@@ -1,0 +1,67 @@
+:root {
+  --sena-blue: #0066cc;
+  --sena-green: #39a900;
+  --sena-dark: #003d7a;
+}
+
+.login-page {
+  min-height: 100vh;
+  position: relative;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.login-bg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, var(--sena-dark) 0%, var(--sena-blue) 50%, var(--sena-green) 100%);
+  z-index: -1;
+}
+
+.login-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.login-card {
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.login-logo {
+  display: inline-block;
+  background: var(--sena-blue);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  letter-spacing: 2px;
+}
+
+.btn-primary {
+  background: var(--sena-blue);
+  border-color: var(--sena-blue);
+  font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: var(--sena-dark);
+  border-color: var(--sena-dark);
+}
+
+.text-primary {
+  color: var(--sena-blue) !important;
+}
+
+.form-control:focus {
+  border-color: var(--sena-blue);
+  box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.2);
+}
+
+.form-control-lg {
+  border-radius: 10px;
+}

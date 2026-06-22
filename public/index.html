@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SENA Carnés — Inicio</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/sena.css" rel="stylesheet">
+</head>
+<body class="auth-body">
+  <div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+      <div class="col-md-8 col-lg-6 text-center">
+        <div class="card shadow-lg border-0 auth-card">
+          <div class="card-body p-5">
+            <div class="sena-logo mb-3">SENA</div>
+            <h1 class="h3 fw-bold text-primary mb-2">
+              Sistema de Gestión de Carnés SENA
+            </h1>
+            <p class="lead text-success mb-4">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              Servidor funcionando correctamente
+            </p>
+            <p class="text-muted mb-4">
+              Backend Express + MySQL operativo. Puede continuar con el módulo de autenticación.
+            </p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+              <a href="/login.html" class="btn btn-primary px-4">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+              </a>
+              <a href="/api/health" class="btn btn-outline-secondary px-4" target="_blank">
+                API Health
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+---
+description: Patrones de arquitectura para código fuente
+alwaysApply: false
+---
+# Arquitectura de código
+
+## Capas
+
+1. `app/` — Rutas, layouts, páginas (solo UI y fetch)
+2. `services/` — Lógica de negocio
+3. `repositories/` — Queries Prisma
+4. `schemas/` — Validación Zod de entrada
+5. `types/` — Tipos TypeScript
+
+## Flujo obligatorio
+
+```
+API Route → Service → Repository → Prisma
+```
+
+## Reglas
+
+- Validar entrada con Zod antes de llamar services
+- Componentes UI reciben datos tipados; evitar fetch directo en componentes profundos
+- Reutilizar `lib/constants.ts` para enums y labels
+- Respuestas API: `{ success, data?, error? }` vía `apiSuccess` / `apiError`
+
+## Prohibido
+
+- Queries Prisma directas en `page.tsx` o componentes
+- Lógica de permisos solo en UI (siempre validar en API/services)

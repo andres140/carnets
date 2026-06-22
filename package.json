@@ -1,0 +1,16 @@
+﻿{
+  "name": "app_carnets",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de gestión de carnés institucionales del SENA",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node backend/server.js",
+    "start": "node backend/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
+  }
+}

@@ -1,0 +1,248 @@
+// Sistema de Gestión de Carnés Institucionales SENA
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum TipoUsuario {
+  APRENDIZ
+  INSTRUCTOR
+  FUNCIONARIO
+  CONTRATISTA
+  COORDINADOR
+  ADMINISTRADOR
+}
+
+enum EstadoCarnet {
+  ACTIVO
+  VENCIDO
+  SUSPENDIDO
+  REVOCADO
+}
+
+enum EstadoUsuario {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
+}
+
+model Regional {
+  id        String   @id @default(cuid())
+  codigo    String   @unique @db.VarChar(10)
+  nombre    String   @db.VarChar(200)
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  centros   CentroFormacion[]
+  usuarios  Usuario[]
+
+  @@map("regionales")
+}
+
+model CentroFormacion {
+  id         String   @id @default(cuid())
+  regionalId String   @map("regional_id")
+  codigo     String   @unique @db.VarChar(20)
+  nombre     String   @db.VarChar(200)
+  activo     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  regional      Regional      @relation(fields: [regionalId], references: [id])
+  dependencias  Dependencia[]
+  usuarios      Usuario[]
+
+  @@index([regionalId])
+  @@map("centros_formacion")
+}
+
+model Dependencia {
+  id        String   @id @default(cuid())
+  centroId  String   @map("centro_id")
+  nombre    String   @db.VarChar(200)
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  centro   CentroFormacion @relation(fields: [centroId], references: [id])
+  usuarios Usuario[]
+
+  @@index([centroId])
+  @@map("dependencias")
+}
+
+model Rol {
+  id          String   @id @default(cuid())
+  nombre      String   @unique @db.VarChar(50)
+  descripcion String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  permisos RolPermiso[]
+  usuarios Usuario[]
+
+  @@map("roles")
+}
+
+model Permiso {
+  id        String   @id @default(cuid())
+  codigo    String   @unique @db.VarChar(100)
+  nombre    String   @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  roles RolPermiso[]
+
+  @@map("permisos")
+}
+
+model RolPermiso {
+  rolId     String @map("rol_id")
+  permisoId String @map("permiso_id")
+
+  rol     Rol     @relation(fields: [rolId], references: [id], onDelete: Cascade)
+  permiso Permiso @relation(fields: [permisoId], references: [id], onDelete: Cascade)
+
+  @@id([rolId, permisoId])
+  @@map("rol_permisos")
+}
+
+model Usuario {
+  id              String        @id @default(cuid())
+  email           String        @unique @db.VarChar(255)
+  passwordHash    String        @map("password_hash") @db.VarChar(255)
+  rolId           String        @map("rol_id")
+  tipoUsuario     TipoUsuario   @map("tipo_usuario")
+  estado          EstadoUsuario @default(ACTIVO)
+  documento       String        @unique @db.VarChar(50)
+  tipoDocumento   String        @map("tipo_documento") @db.VarChar(20)
+  nombreCompleto  String        @map("nombre_completo") @db.VarChar(300)
+  fotoUrl         String?       @map("foto_url") @db.VarChar(500)
+  regionalId      String?       @map("regional_id")
+  centroId        String?       @map("centro_id")
+  dependenciaId   String?       @map("dependencia_id")
+  telefono        String?       @db.VarChar(30)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  deactivatedAt   DateTime?     @map("deactivated_at")
+
+  rol         Rol              @relation(fields: [rolId], references: [id])
+  regional    Regional?        @relation(fields: [regionalId], references: [id])
+  centro      CentroFormacion? @relation(fields: [centroId], references: [id])
+  dependencia Dependencia?     @relation(fields: [dependenciaId], references: [id])
+
+  carnetsEmitidos     Carnet[]              @relation("EmitidoPor")
+  carnets             Carnet[]
+  cambiosEstadoCarnet   CarnetEstadoHistorial[]
+  validacionesQr        ValidacionQr[]
+  auditLogs             AuditLog[]
+  cargasMasivas         CargaMasiva[]
+
+  @@index([documento])
+  @@index([regionalId])
+  @@index([centroId])
+  @@map("usuarios")
+}
+
+model Carnet {
+  id                String       @id @default(cuid())
+  codigoUnico       String       @unique @map("codigo_unico") @db.VarChar(50)
+  usuarioId         String       @map("usuario_id")
+  estado            EstadoCarnet @default(ACTIVO)
+  fechaExpedicion   DateTime     @map("fecha_expedicion")
+  fechaVencimiento  DateTime     @map("fecha_vencimiento")
+  qrToken           String       @unique @map("qr_token") @db.VarChar(255)
+  fotoUrl           String?      @map("foto_url") @db.VarChar(500)
+  nombreCompleto    String       @map("nombre_completo") @db.VarChar(300)
+  documento         String       @db.VarChar(50)
+  tipoUsuario       TipoUsuario  @map("tipo_usuario")
+  centroNombre      String?      @map("centro_nombre") @db.VarChar(200)
+  regionalNombre    String?      @map("regional_nombre") @db.VarChar(200)
+  pdfGeneradoUrl    String?      @map("pdf_generado_url") @db.VarChar(500)
+  emitidoPorId      String       @map("emitido_por_id")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  usuario    Usuario @relation(fields: [usuarioId], references: [id])
+  emitidoPor Usuario @relation("EmitidoPor", fields: [emitidoPorId], references: [id])
+
+  historialEstados CarnetEstadoHistorial[]
+  validacionesQr   ValidacionQr[]
+
+  @@index([codigoUnico])
+  @@index([qrToken])
+  @@index([usuarioId])
+  @@index([estado])
+  @@map("carnets")
+}
+
+model CarnetEstadoHistorial {
+  id             String        @id @default(cuid())
+  carnetId       String        @map("carnet_id")
+  estadoAnterior EstadoCarnet? @map("estado_anterior")
+  estadoNuevo    EstadoCarnet  @map("estado_nuevo")
+  motivo         String?       @db.VarChar(500)
+  usuarioId      String        @map("usuario_id")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  carnet  Carnet  @relation(fields: [carnetId], references: [id], onDelete: Cascade)
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@index([carnetId])
+  @@map("carnet_estados_historial")
+}
+
+model ValidacionQr {
+  id        String   @id @default(cuid())
+  carnetId  String   @map("carnet_id")
+  ip        String?  @db.VarChar(45)
+  resultado String   @db.VarChar(50)
+  usuarioId String?  @map("usuario_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  carnet  Carnet   @relation(fields: [carnetId], references: [id])
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([carnetId])
+  @@index([createdAt])
+  @@map("validaciones_qr")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  usuarioId   String?  @map("usuario_id")
+  accion      String   @db.VarChar(100)
+  entidad     String   @db.VarChar(100)
+  entidadId   String?  @map("entidad_id") @db.VarChar(100)
+  detalleJson Json?    @map("detalle_json")
+  ip          String?  @db.VarChar(45)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([createdAt])
+  @@index([entidad])
+  @@index([usuarioId])
+  @@map("audit_logs")
+}
+
+model CargaMasiva {
+  id        String   @id @default(cuid())
+  archivo   String   @db.VarChar(500)
+  total     Int      @default(0)
+  exitos    Int      @default(0)
+  errores   Int      @default(0)
+  detalle   Json?
+  usuarioId String   @map("usuario_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@map("cargas_masivas")
+}

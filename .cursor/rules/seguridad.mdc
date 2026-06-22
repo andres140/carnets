@@ -1,0 +1,32 @@
+---
+description: Reglas de seguridad para API y middleware
+globs: src/app/api/**,src/middleware.ts
+alwaysApply: false
+---
+
+# Seguridad
+
+## Autenticación y autorización
+
+- Verificar sesión con `requireApiSession()` o `requirePermission()` en cada API route
+- Usar `hasPermission(user, 'permiso.codigo')` para RBAC granular
+- Coordinadores: filtrar por `regional_id` en services
+
+## Datos sensibles
+
+- **Nunca** devolver `passwordHash` en respuestas API
+- QR público: solo estado + nombre parcial, sin documento completo
+- Tokens QR firmados con `QR_SIGNING_KEY`
+
+## Uploads
+
+- Validar MIME (JPEG, PNG, WebP) y tamaño máximo (5MB)
+- Nombres de archivo aleatorios, sin paths del usuario
+
+## Auditoría
+
+Registrar en `audit_logs` todas las operaciones CREATE, UPDATE, DELETE de:
+- Usuarios
+- Carnés
+- Roles y permisos
+- Configuración (regionales, centros)

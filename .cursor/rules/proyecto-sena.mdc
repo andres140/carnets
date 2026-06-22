@@ -1,0 +1,33 @@
+---
+description: Stack Express SENA Carnés — reglas globales
+alwaysApply: true
+---
+
+# SENA Carnés — Express + Bootstrap
+
+## Stack activo
+
+- Backend: Node.js, Express, MySQL (mysql2), bcryptjs, express-session, multer
+- Frontend: HTML, CSS, JavaScript, Bootstrap 5 en `public/`
+- Documentación obligatoria: README.md, DATABASE.md, ARCHITECTURE.md, ROADMAP.md, CHANGELOG.md
+
+## Arquitectura
+
+```
+Routes → Controllers → Services → MySQL
+```
+
+- Código backend en `backend/`
+- Sin lógica de negocio en controllers (solo orquestación)
+- Consultas SQL parametrizadas siempre
+- Mutaciones críticas → `auditoriaService.log()`
+
+## Convenciones
+
+- UI en español; código en inglés
+- API: `{ success, data?, error?, message? }`
+- IDs: UUID v4
+
+## Legacy
+
+La carpeta `src/` contiene implementación Next.js previa. No modificar salvo migración explícita.

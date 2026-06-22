@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gestión de Carnés SENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/carnets.css" />
+  </head>
+  <body class="bg-light">
+    <main class="container py-4">
+      <h1 class="h3 mb-4">Gestión de carnés institucionales</h1>
+      <section class="card shadow-sm mb-4">
+        <div class="card-body">
+          <form id="carnetForm" class="row g-3">
+            <div class="col-md-4"><label class="form-label">Usuario</label><input id="usuario" class="form-control" required /></div>
+            <div class="col-md-4"><label class="form-label">Observación</label><input id="observacion" class="form-control" /></div>
+            <div class="col-md-4 d-flex align-items-end"><button class="btn btn-primary w-100" type="submit">Generar carné</button></div>
+          </form>
+        </div>
+      </section>
+      <section class="card shadow-sm">
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4"><input id="buscar" class="form-control" placeholder="Buscar por código o usuario" /></div>
+            <div class="col-md-4"><select id="estadoFiltro" class="form-select"><option value="">Todos los estados</option></select></div>
+            <div class="col-md-4"><button id="refreshBtn" class="btn btn-outline-secondary w-100">Actualizar</button></div>
+          </div>
+          <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>Código</th><th>Usuario</th><th>Estado</th><th>Expedición</th><th>Vencimiento</th><th>Acciones</th></tr></thead><tbody id="tablaCarnets"></tbody></table></div>
+        </div>
+      </section>
+    </main>
+    <script src="/carnets.js"></script>
+  </body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios — SENA Carnés</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/sena.css" rel="stylesheet">
+  <link href="/css/usuarios.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="/dashboard.html">
+        <i class="bi bi-person-badge me-2"></i>SENA Carnés
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/usuarios.html">Usuarios</a></li>
+          <li class="nav-item"><a class="nav-link disabled" href="#">Carnés</a></li>
+          <li class="nav-item"><a class="nav-link" href="/validar.html">Validar QR</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-3">
+          <span class="text-white-50 small d-none d-md-inline" id="userName"></span>
+          <button class="btn btn-outline-light btn-sm" id="btnLogout">
+            <i class="bi bi-box-arrow-right"></i> Salir
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+      <div>
+        <h1 class="h3 fw-bold mb-1">Gestión de usuarios</h1>
+        <p class="text-muted mb-0">Crear, consultar, editar y desactivar usuarios del sistema</p>
+      </div>
+      <button class="btn btn-primary" id="btnNuevoUsuario">
+        <i class="bi bi-person-plus me-1"></i> Nuevo usuario
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm filters-card mb-4">
+      <div class="card-body">
+        <form id="formFiltros" class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small">Búsqueda general</label>
+            <input type="text" class="form-control" id="filtroSearch" placeholder="Documento, nombre o correo">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small">Documento</label>
+            <input type="text" class="form-control" id="filtroDocumento">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small">Nombre</label>
+            <input type="text" class="form-control" id="filtroNombre">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small">Correo</label>
+            <input type="text" class="form-control" id="filtroEmail">
+          </div>
+          <div class="col-md-1">
+            <label class="form-label small">Rol</label>
+            <select class="form-select" id="filtroRol">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="col-md-1">
+            <label class="form-label small">Estado</label>
+            <select class="form-select" id="filtroEstado">
+              <option value="">Todos</option>
+              <option value="ACTIVO">Activo</option>
+              <option value="INACTIVO">Inactivo</option>
+              <option value="SUSPENDIDO">Suspendido</option>
+            </select>
+          </div>
+          <div class="col-md-1 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="bi bi-search"></i>
+            </button>
+            <button type="button" class="btn btn-outline-secondary" id="btnLimpiarFiltros" title="Limpiar">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-users mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Foto</th>
+                <th>Documento</th>
+                <th>Nombre completo</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Centro</th>
+                <th>Regional</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaUsuarios">
+              <tr><td colspan="8" class="text-center py-4 text-muted">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span class="text-muted small" id="paginacionInfo">—</span>
+        <nav>
+          <ul class="pagination pagination-sm mb-0" id="paginacion"></ul>
+        </nav>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal crear/editar -->
+  <div class="modal fade modal-user" id="modalUsuario" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalUsuarioTitulo">Nuevo usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formUsuario">
+          <div class="modal-body">
+            <div id="formAlert" class="alert alert-danger d-none" role="alert"></div>
+            <input type="hidden" id="usuarioId">
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Tipo documento</label>
+                <select class="form-select" id="tipoDocumento" required>
+                  <option value="CC">C.C.</option>
+                  <option value="CE">C.E.</option>
+                  <option value="TI">T.I.</option>
+                  <option value="PA">Pasaporte</option>
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">Documento *</label>
+                <input type="text" class="form-control" id="documento" required maxlength="50">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nombres *</label>
+                <input type="text" class="form-control" id="nombres" required maxlength="150">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Apellidos *</label>
+                <input type="text" class="form-control" id="apellidos" required maxlength="150">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Correo *</label>
+                <input type="email" class="form-control" id="email" required maxlength="255">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" id="telefono" maxlength="30">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" id="labelPassword">Contraseña *</label>
+                <input type="password" class="form-control" id="password" minlength="6">
+                <div class="form-text" id="passwordHelp">Mínimo 6 caracteres</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Estado</label>
+                <select class="form-select" id="estado">
+                  <option value="ACTIVO">Activo</option>
+                  <option value="INACTIVO">Inactivo</option>
+                  <option value="SUSPENDIDO">Suspendido</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Rol *</label>
+                <select class="form-select" id="rolId" required></select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Regional</label>
+                <select class="form-select" id="regionalId">
+                  <option value="">— Seleccionar —</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Centro de formación</label>
+                <select class="form-select" id="centroId" disabled>
+                  <option value="">— Seleccionar regional —</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Dependencia</label>
+                <select class="form-select" id="dependenciaId" disabled>
+                  <option value="">— Seleccionar centro —</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Foto</label>
+                <div class="d-flex align-items-center gap-3">
+                  <img src="" alt="" class="photo-preview d-none" id="fotoPreview">
+                  <input type="file" class="form-control" id="foto" accept="image/jpeg,image/png,image/webp">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="btnGuardar">
+              <span class="spinner-border spinner-border-sm d-none me-1" id="btnGuardarSpinner"></span>
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/usuarios.js"></script>
+</body>
+</html>

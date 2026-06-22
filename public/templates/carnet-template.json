@@ -1,0 +1,22 @@
+{
+  "name": "carnet-sena-default",
+  "width": 340,
+  "height": 220,
+  "colors": {
+    "primary": "#0066CC",
+    "text": "#1a1a1a",
+    "muted": "#666666"
+  },
+  "fields": [
+    "foto",
+    "nombreCompleto",
+    "documento",
+    "tipoUsuario",
+    "centroNombre",
+    "regionalNombre",
+    "codigoUnico",
+    "fechaExpedicion",
+    "fechaVencimiento",
+    "qr"
+  ]
+}
