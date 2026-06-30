@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS regionales (
   id            VARCHAR(36)  NOT NULL PRIMARY KEY,
   codigo        VARCHAR(10)  NOT NULL,
   nombre        VARCHAR(200) NOT NULL,
+  
   activo        TINYINT(1)   NOT NULL DEFAULT 1,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -61,9 +62,11 @@ CREATE TABLE IF NOT EXISTS roles (
   id            VARCHAR(36)  NOT NULL PRIMARY KEY,
   nombre        VARCHAR(50)  NOT NULL,
   descripcion   VARCHAR(500) NULL,
+  activo        TINYINT(1)   NOT NULL DEFAULT 1,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uk_roles_nombre (nombre)
+  UNIQUE KEY uk_roles_nombre (nombre),
+  KEY idx_roles_activo (activo)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS permisos (
@@ -147,13 +150,19 @@ CREATE TABLE IF NOT EXISTS carnets (
   foto_url          VARCHAR(500) NULL,
   nombre_completo   VARCHAR(300) NOT NULL,
   documento         VARCHAR(50)  NOT NULL,
+  tipo_documento    VARCHAR(20)  NOT NULL DEFAULT 'CC',
   tipo_usuario      ENUM(
                       'APRENDIZ','INSTRUCTOR','FUNCIONARIO',
                       'CONTRATISTA','COORDINADOR','ADMINISTRADOR'
                     ) NOT NULL,
   centro_nombre     VARCHAR(200) NULL,
   regional_nombre   VARCHAR(200) NULL,
+  dependencia_nombre VARCHAR(200) NULL,
   pdf_url           VARCHAR(500) NULL,
+  pdf_generado_at   DATETIME     NULL,
+  pdf_hash          VARCHAR(64)  NULL,
+  template_id       VARCHAR(50)  NOT NULL DEFAULT 'default',
+  reimpresiones_count INT        NOT NULL DEFAULT 0,
   emitido_por_id    VARCHAR(36)  NOT NULL,
   created_at        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -167,6 +176,23 @@ CREATE TABLE IF NOT EXISTS carnets (
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_carnets_emitido_por
     FOREIGN KEY (emitido_por_id) REFERENCES usuarios(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS carnet_documentos_historial (
+  id            VARCHAR(36) NOT NULL PRIMARY KEY,
+  carnet_id     VARCHAR(36) NOT NULL,
+  accion        ENUM('GENERAR','DESCARGAR','IMPRIMIR','REIMPRIMIR') NOT NULL,
+  usuario_id    VARCHAR(36) NOT NULL,
+  detalle_json  JSON         NULL,
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_carnet_doc_carnet (carnet_id),
+  KEY idx_carnet_doc_fecha (created_at),
+  CONSTRAINT fk_carnet_doc_carnet
+    FOREIGN KEY (carnet_id) REFERENCES carnets(id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_carnet_doc_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
@@ -189,17 +215,19 @@ CREATE TABLE IF NOT EXISTS historial_carnets (
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS validaciones_qr (
-  id          VARCHAR(36) NOT NULL PRIMARY KEY,
-  carnet_id   VARCHAR(36) NOT NULL,
-  ip          VARCHAR(45) NULL,
-  resultado   VARCHAR(50) NOT NULL,
-  usuario_id  VARCHAR(36) NULL,
-  created_at  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id               VARCHAR(36) NOT NULL PRIMARY KEY,
+  carnet_id        VARCHAR(36) NULL,
+  token_intentado  VARCHAR(255) NULL,
+  ip               VARCHAR(45) NULL,
+  resultado        VARCHAR(50) NOT NULL,
+  usuario_id       VARCHAR(36) NULL,
+  created_at       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_validaciones_carnet (carnet_id),
   KEY idx_validaciones_fecha (created_at),
+  KEY idx_validaciones_resultado (resultado),
   CONSTRAINT fk_validaciones_carnet
     FOREIGN KEY (carnet_id) REFERENCES carnets(id)
-    ON UPDATE CASCADE ON DELETE CASCADE,
+    ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT fk_validaciones_usuario
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
     ON UPDATE CASCADE ON DELETE SET NULL

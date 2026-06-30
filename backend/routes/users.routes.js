@@ -1,24 +1,34 @@
 const express = require('express');
 const usersController = require('../controllers/users.controller');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
 const { validateCreateUser, validateUpdateUser } = require('../middleware/validate');
+const { csrfProtection } = require('../middleware/csrf');
 const { upload } = require('../config/upload');
+const { PERMISOS } = require('../constants');
 
 const router = express.Router();
 
-const adminOrCoord = [requireAuth, requireRole('ADMINISTRADOR', 'COORDINADOR')];
+const mutate = [csrfProtection];
 
-router.get('/catalogos/roles', ...adminOrCoord, usersController.getRoles);
-router.get('/catalogos/regionales', ...adminOrCoord, usersController.getRegionales);
-router.get('/catalogos/centros', ...adminOrCoord, usersController.getCentros);
-router.get('/catalogos/dependencias', ...adminOrCoord, usersController.getDependencias);
+router.get(
+  '/usuarios',
+  requireAuth,
+  requirePermission(PERMISOS.USUARIOS_VER),
+  usersController.list
+);
 
-router.get('/usuarios', ...adminOrCoord, usersController.list);
-router.get('/usuarios/:id', ...adminOrCoord, usersController.getOne);
+router.get(
+  '/usuarios/:id',
+  requireAuth,
+  requirePermission(PERMISOS.USUARIOS_VER),
+  usersController.getOne
+);
 
 router.post(
   '/usuarios',
-  ...adminOrCoord,
+  requireAuth,
+  requirePermission(PERMISOS.USUARIOS_CREAR),
+  ...mutate,
   upload.single('foto'),
   validateCreateUser,
   usersController.create
@@ -26,13 +36,28 @@ router.post(
 
 router.put(
   '/usuarios/:id',
-  ...adminOrCoord,
+  requireAuth,
+  requirePermission(PERMISOS.USUARIOS_EDITAR),
+  ...mutate,
   upload.single('foto'),
   validateUpdateUser,
   usersController.update
 );
 
-router.patch('/usuarios/:id/desactivar', ...adminOrCoord, usersController.deactivate);
-router.patch('/usuarios/:id/reactivar', ...adminOrCoord, usersController.reactivate);
+router.patch(
+  '/usuarios/:id/desactivar',
+  requireAuth,
+  requirePermission(PERMISOS.USUARIOS_DESACTIVAR),
+  ...mutate,
+  usersController.deactivate
+);
+
+router.patch(
+  '/usuarios/:id/reactivar',
+  requireAuth,
+  requirePermission(PERMISOS.USUARIOS_EDITAR),
+  ...mutate,
+  usersController.reactivate
+);
 
 module.exports = router;

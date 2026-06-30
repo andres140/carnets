@@ -1,7 +1,9 @@
 const { query } = require('../config/database');
 
 async function getRoles() {
-  return query('SELECT id, nombre, descripcion FROM roles ORDER BY nombre');
+  return query(
+    'SELECT id, nombre, descripcion FROM roles WHERE activo = 1 ORDER BY nombre'
+  );
 }
 
 async function getRegionales() {

@@ -59,6 +59,10 @@
   color: #6c757d;
 }
 
+.toast-container {
+  z-index: 1090;
+}
+
 @media (max-width: 768px) {
   .table-responsive {
     font-size: 0.875rem;

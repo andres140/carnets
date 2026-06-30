@@ -4,7 +4,7 @@ services:
     container_name: sena_carnets_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: sena_carnets
     ports:
       - "3306:3306"

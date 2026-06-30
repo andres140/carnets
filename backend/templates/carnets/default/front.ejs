@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Carné <%= codigoUnico %> — Anverso</title>
+  <style><%- styles %></style>
+</head>
+<body>
+  <div class="carnet-page carnet-front">
+    <span class="carnet-estado-badge estado-<%= estadoResuelto %>"><%= estadoResuelto %></span>
+    <div class="carnet-header">
+      <div class="carnet-logo">LOGO<br>SENA</div>
+      <div class="carnet-header-text">
+        <div class="institucion">Servicio Nacional de Aprendizaje</div>
+        <div class="subtitulo">Carné institucional — Anverso</div>
+      </div>
+    </div>
+    <div class="carnet-body">
+      <% if (fotoDataUrl) { %>
+        <img src="<%= fotoDataUrl %>" alt="Foto" class="carnet-photo">
+      <% } else { %>
+        <div class="carnet-photo-placeholder">Sin fotografía</div>
+      <% } %>
+      <div>
+        <p class="carnet-field-label">Nombre completo</p>
+        <p class="carnet-field-value"><%= nombreCompleto %></p>
+        <p class="carnet-field-label">Documento</p>
+        <p class="carnet-field-value"><%= tipoDocumento %> <%= documento %></p>
+        <p class="carnet-field-label">Tipo de usuario</p>
+        <p class="carnet-field-value"><%= tipoUsuario %></p>
+        <p class="carnet-field-label">Centro / Regional</p>
+        <p class="carnet-field-value small"><%= centroNombre || '—' %><br><%= regionalNombre || '—' %></p>
+      </div>
+    </div>
+    <div class="carnet-footer">
+      <div>
+        <p class="carnet-field-label">Código único</p>
+        <p class="carnet-code"><%= codigoUnico %></p>
+        <p class="carnet-field-label">Vence</p>
+        <p class="carnet-field-value small" style="margin:0"><%= fechaVencimientoFmt %></p>
+      </div>
+      <div class="carnet-qr-box">
+        <% if (qrDataUrl) { %>
+          <img src="<%= qrDataUrl %>" alt="Código QR de validación" class="carnet-qr-image">
+        <% } else { %>
+          <div class="carnet-placeholder-box">QR<br><small>Al emitir</small></div>
+        <% } %>
+      </div>
+      <div class="carnet-placeholder-box">Firma<br>autorizada</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -2,12 +2,17 @@
  * Módulo de gestión de usuarios
  */
 (function () {
+  const PHOTO_MAX_MB = 5;
+  const PHOTO_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const state = {
     page: 1,
     limit: 10,
     roles: [],
     regionales: [],
     editingId: null,
+    currentUser: null,
   };
 
   const modalEl = document.getElementById('modalUsuario');
@@ -21,7 +26,29 @@
     formUsuario: document.getElementById('formUsuario'),
     formAlert: document.getElementById('formAlert'),
     userName: document.getElementById('userName'),
+    toastContainer: document.getElementById('toastContainer'),
   };
+
+  function showToast(message, type = 'success') {
+    const id = `toast-${Date.now()}`;
+    const bg = type === 'success' ? 'text-bg-success' : 'text-bg-danger';
+    const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle';
+
+    els.toastContainer.insertAdjacentHTML(
+      'beforeend',
+      `<div id="${id}" class="toast align-items-center ${bg} border-0" role="alert">
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi ${icon} me-2"></i>${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>`
+    );
+
+    const toastEl = document.getElementById(id);
+    const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+    toast.show();
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+  }
 
   function badgeEstado(estado) {
     const map = {
@@ -57,8 +84,12 @@
       documento: document.getElementById('filtroDocumento').value.trim(),
       nombre: document.getElementById('filtroNombre').value.trim(),
       email: document.getElementById('filtroEmail').value.trim(),
+      tipoUsuario: document.getElementById('filtroTipoUsuario').value,
       rolId: document.getElementById('filtroRol').value,
       estado: document.getElementById('filtroEstado').value,
+      regionalId: document.getElementById('filtroRegional').value,
+      centroId: document.getElementById('filtroCentro').value,
+      dependenciaId: document.getElementById('filtroDependencia').value,
     };
 
     Object.entries(fields).forEach(([key, val]) => {
@@ -70,21 +101,22 @@
 
   async function loadUsuarios() {
     els.tabla.innerHTML =
-      '<tr><td colspan="8" class="text-center py-4 text-muted">Cargando...</td></tr>';
+      '<tr><td colspan="9" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Cargando...</td></tr>';
 
     try {
       const res = await API.get(`/api/usuarios?${buildQueryParams()}`);
       renderTabla(res.data.items);
       renderPaginacion(res.data.pagination);
     } catch (err) {
-      els.tabla.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">${err.message}</td></tr>`;
+      els.tabla.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">${err.message}</td></tr>`;
+      showToast(err.message, 'error');
     }
   }
 
   function renderTabla(items) {
     if (!items.length) {
       els.tabla.innerHTML =
-        '<tr><td colspan="8"><div class="empty-state"><i class="bi bi-people fs-1 d-block mb-2"></i>No se encontraron usuarios</div></td></tr>';
+        '<tr><td colspan="9"><div class="empty-state"><i class="bi bi-people fs-1 d-block mb-2"></i>No se encontraron usuarios</div></td></tr>';
       return;
     }
 
@@ -95,6 +127,7 @@
         <td>${avatarHtml(u.fotoUrl, u.nombreCompleto)}</td>
         <td><span class="fw-medium">${u.documento}</span></td>
         <td>${u.nombreCompleto}</td>
+        <td class="small text-muted">${u.email}</td>
         <td><span class="badge bg-primary-subtle text-primary">${u.rolNombre}</span></td>
         <td>${badgeEstado(u.estado)}</td>
         <td>${u.centroNombre || '—'}</td>
@@ -153,6 +186,28 @@
     });
   }
 
+  async function loadCentrosForSelect(select, regionalId, placeholder) {
+    if (!regionalId) {
+      select.disabled = true;
+      select.innerHTML = `<option value="">${placeholder || '— Seleccionar regional —'}</option>`;
+      return;
+    }
+    const res = await API.get(`/api/catalogos/centros?regionalId=${regionalId}`);
+    fillSelect(select, res.data, 'id', (c) => c.nombre, '— Seleccionar —');
+    select.disabled = false;
+  }
+
+  async function loadDependenciasForSelect(select, centroId, placeholder) {
+    if (!centroId) {
+      select.disabled = true;
+      select.innerHTML = `<option value="">${placeholder || '— Seleccionar centro —'}</option>`;
+      return;
+    }
+    const res = await API.get(`/api/catalogos/dependencias?centroId=${centroId}`);
+    fillSelect(select, res.data, 'id', (d) => d.nombre, '— Seleccionar —');
+    select.disabled = false;
+  }
+
   async function loadCatalogos() {
     const [rolesRes, regionalesRes] = await Promise.all([
       API.get('/api/catalogos/roles'),
@@ -170,37 +225,36 @@
       (r) => r.nombre,
       '— Seleccionar —'
     );
+    fillSelect(
+      document.getElementById('filtroRegional'),
+      state.regionales,
+      'id',
+      (r) => r.nombre,
+      'Todas'
+    );
+
+    if (state.currentUser?.tipoUsuario === 'COORDINADOR' && state.currentUser.regionalId) {
+      const filtroRegional = document.getElementById('filtroRegional');
+      filtroRegional.value = state.currentUser.regionalId;
+      filtroRegional.disabled = true;
+      await loadCentrosForSelect(
+        document.getElementById('filtroCentro'),
+        state.currentUser.regionalId,
+        '— Regional —'
+      );
+    }
   }
 
   async function loadCentros(regionalId) {
     const select = document.getElementById('centroId');
     const depSelect = document.getElementById('dependenciaId');
-
-    if (!regionalId) {
-      select.disabled = true;
-      select.innerHTML = '<option value="">— Seleccionar regional —</option>';
-      depSelect.disabled = true;
-      depSelect.innerHTML = '<option value="">— Seleccionar centro —</option>';
-      return;
-    }
-
-    const res = await API.get(`/api/catalogos/centros?regionalId=${regionalId}`);
-    fillSelect(select, res.data, 'id', (c) => c.nombre, '— Seleccionar —');
-    select.disabled = false;
+    await loadCentrosForSelect(select, regionalId);
     depSelect.disabled = true;
     depSelect.innerHTML = '<option value="">— Seleccionar centro —</option>';
   }
 
   async function loadDependencias(centroId) {
-    const select = document.getElementById('dependenciaId');
-    if (!centroId) {
-      select.disabled = true;
-      select.innerHTML = '<option value="">— Seleccionar centro —</option>';
-      return;
-    }
-    const res = await API.get(`/api/catalogos/dependencias?centroId=${centroId}`);
-    fillSelect(select, res.data, 'id', (d) => d.nombre, '— Seleccionar —');
-    select.disabled = false;
+    await loadDependenciasForSelect(document.getElementById('dependenciaId'), centroId);
   }
 
   function showFormError(msg) {
@@ -223,6 +277,45 @@
     document.getElementById('passwordHelp').textContent = 'Mínimo 6 caracteres';
     hideFormError();
     state.editingId = null;
+  }
+
+  function validateFormClient() {
+    const documento = document.getElementById('documento').value.trim();
+    const nombres = document.getElementById('nombres').value.trim();
+    const apellidos = document.getElementById('apellidos').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const rolId = document.getElementById('rolId').value;
+    const telefono = document.getElementById('telefono').value.trim();
+    const foto = document.getElementById('foto').files[0];
+    const isEdit = Boolean(document.getElementById('usuarioId').value);
+
+    if (!documento || documento.length < 5 || documento.length > 50) {
+      return 'El documento debe tener entre 5 y 50 caracteres';
+    }
+    if (!nombres) return 'Los nombres son obligatorios';
+    if (!apellidos) return 'Los apellidos son obligatorios';
+    if (!email || !EMAIL_REGEX.test(email)) return 'Ingrese un correo válido';
+    if (!isEdit && (!password || password.length < 6)) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
+    if (password && password.length < 6) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
+    if (!rolId) return 'Seleccione un rol';
+    if (telefono && !/^[\d\s+()-]{7,30}$/.test(telefono)) {
+      return 'El teléfono no tiene un formato válido';
+    }
+    if (foto) {
+      if (!PHOTO_ALLOWED_TYPES.includes(foto.type)) {
+        return 'Formato de foto no permitido. Use JPEG, PNG o WebP';
+      }
+      if (foto.size > PHOTO_MAX_MB * 1024 * 1024) {
+        return `La foto no puede superar ${PHOTO_MAX_MB} MB`;
+      }
+    }
+
+    return null;
   }
 
   function openCreateModal() {
@@ -273,7 +366,7 @@
 
       modal.show();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   }
 
@@ -293,7 +386,7 @@
       dependenciaId: document.getElementById('dependenciaId').value,
     };
 
-    Object.entries(fields).forEach(([k, v) => {
+    Object.entries(fields).forEach(([k, v]) => {
       if (v) fd.append(k, v);
     });
 
@@ -310,6 +403,12 @@
     e.preventDefault();
     hideFormError();
 
+    const clientError = validateFormClient();
+    if (clientError) {
+      showFormError(clientError);
+      return;
+    }
+
     const spinner = document.getElementById('btnGuardarSpinner');
     const btn = document.getElementById('btnGuardar');
     spinner.classList.remove('d-none');
@@ -318,14 +417,16 @@
     try {
       const fd = buildFormData();
       const id = document.getElementById('usuarioId').value;
+      let res;
 
       if (id) {
-        await API.put(`/api/usuarios/${id}`, fd);
+        res = await API.put(`/api/usuarios/${id}`, fd);
       } else {
-        await API.post('/api/usuarios', fd);
+        res = await API.post('/api/usuarios', fd);
       }
 
       modal.hide();
+      showToast(res.message || 'Usuario guardado correctamente');
       await loadUsuarios();
     } catch (err) {
       showFormError(err.message);
@@ -335,23 +436,41 @@
     }
   }
 
-  async function desactivarUsuario(id) {
+  async function desactivarUsuario(id, btn) {
     if (!confirm('¿Desactivar este usuario? No se eliminará el registro.')) return;
+
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
     try {
-      await API.patch(`/api/usuarios/${id}/desactivar`);
+      const res = await API.patch(`/api/usuarios/${id}/desactivar`);
+      showToast(res.message || 'Usuario desactivado');
       await loadUsuarios();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
     }
   }
 
-  async function reactivarUsuario(id) {
+  async function reactivarUsuario(id, btn) {
     if (!confirm('¿Reactivar este usuario?')) return;
+
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
     try {
-      await API.patch(`/api/usuarios/${id}/reactivar`);
+      const res = await API.patch(`/api/usuarios/${id}/reactivar`);
+      showToast(res.message || 'Usuario reactivado');
       await loadUsuarios();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
     }
   }
 
@@ -359,9 +478,14 @@
     try {
       const res = await API.get('/api/auth/me');
       const user = res.data;
+      state.currentUser = user;
       els.userName.textContent = user.nombreCompleto;
 
-      if (!['ADMINISTRADOR', 'COORDINADOR'].includes(user.rolNombre)) {
+      const canView =
+        user.permisos?.includes('usuarios.ver') ||
+        ['ADMINISTRADOR', 'COORDINADOR'].includes(user.rolNombre);
+
+      if (!canView) {
         window.location.href = '/dashboard.html';
       }
     } catch {
@@ -384,8 +508,36 @@
 
     document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
       els.formFiltros.reset();
+      document.getElementById('filtroCentro').disabled = true;
+      document.getElementById('filtroCentro').innerHTML = '<option value="">— Regional —</option>';
+      document.getElementById('filtroDependencia').disabled = true;
+      document.getElementById('filtroDependencia').innerHTML = '<option value="">— Centro —</option>';
+
+      if (state.currentUser?.tipoUsuario === 'COORDINADOR' && state.currentUser.regionalId) {
+        document.getElementById('filtroRegional').value = state.currentUser.regionalId;
+      }
+
       state.page = 1;
       loadUsuarios();
+    });
+
+    document.getElementById('filtroRegional').addEventListener('change', async (e) => {
+      const dep = document.getElementById('filtroDependencia');
+      dep.disabled = true;
+      dep.innerHTML = '<option value="">— Centro —</option>';
+      await loadCentrosForSelect(
+        document.getElementById('filtroCentro'),
+        e.target.value,
+        '— Regional —'
+      );
+    });
+
+    document.getElementById('filtroCentro').addEventListener('change', async (e) => {
+      await loadDependenciasForSelect(
+        document.getElementById('filtroDependencia'),
+        e.target.value,
+        '— Centro —'
+      );
     });
 
     els.paginacion.addEventListener('click', (e) => {
@@ -401,8 +553,8 @@
       const btnDes = e.target.closest('.btn-desactivar');
       const btnReact = e.target.closest('.btn-reactivar');
       if (btnEdit) openEditModal(btnEdit.dataset.id);
-      if (btnDes) desactivarUsuario(btnDes.dataset.id);
-      if (btnReact) reactivarUsuario(btnReact.dataset.id);
+      if (btnDes) desactivarUsuario(btnDes.dataset.id, btnDes);
+      if (btnReact) reactivarUsuario(btnReact.dataset.id, btnReact);
     });
 
     els.formUsuario.addEventListener('submit', saveUsuario);
@@ -418,10 +570,23 @@
     document.getElementById('foto').addEventListener('change', (e) => {
       const file = e.target.files[0];
       const preview = document.getElementById('fotoPreview');
-      if (file) {
-        preview.src = URL.createObjectURL(file);
-        preview.classList.remove('d-none');
+      if (!file) return;
+
+      if (!PHOTO_ALLOWED_TYPES.includes(file.type)) {
+        e.target.value = '';
+        preview.classList.add('d-none');
+        showToast('Formato de foto no permitido', 'error');
+        return;
       }
+      if (file.size > PHOTO_MAX_MB * 1024 * 1024) {
+        e.target.value = '';
+        preview.classList.add('d-none');
+        showToast(`La foto no puede superar ${PHOTO_MAX_MB} MB`, 'error');
+        return;
+      }
+
+      preview.src = URL.createObjectURL(file);
+      preview.classList.remove('d-none');
     });
   }
 

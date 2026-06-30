@@ -4,19 +4,16 @@
  */
 
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const passwordRecoveryService = require('../services/passwordRecoveryService');
 const emailService = require('../lib/emailService');
 const { sanitizeEmail } = require('../lib/inputSanitizer');
 const { validatePassword } = require('../lib/passwordValidator');
 const { loginRateLimit } = require('../middleware/rateLimit');
+const { getClientIp } = require('../utils/request');
 const db = require('../config/database');
-const crypto = require('crypto');
 
 const router = express.Router();
-
-function getClientIp(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
-}
 
 /**
  * POST /api/auth/forgot-password
@@ -48,18 +45,18 @@ router.post('/forgot-password', loginRateLimit, async (req, res, next) => {
     );
 
     // Buscar usuario para enviar email
-    const users = await db.query('SELECT id, nombres, apellidos FROM usuarios WHERE email = ?', [
-      sanitizedEmail,
-    ]);
+    const users = await db.query(
+      'SELECT id, nombre_completo FROM usuarios WHERE email = ?',
+      [sanitizedEmail]
+    );
 
     if (users.length > 0) {
       const user = users[0];
       const resetToken = result.token;
       const resetLink = `${process.env.APP_URL || 'http://localhost:3000'}/auth/reset-password/${resetToken}`;
 
-      // Enviar email de forma asíncrona (no bloquear respuesta)
       emailService
-        .sendPasswordResetEmail(sanitizedEmail, resetLink, user.nombres)
+        .sendPasswordResetEmail(sanitizedEmail, resetLink, user.nombre_completo)
         .catch((err) => console.error('Error enviando email:', err));
     }
 
@@ -133,8 +130,7 @@ router.post('/reset-password', loginRateLimit, async (req, res, next) => {
       });
     }
 
-    // Hashear contraseña (usar bcrypt en producción)
-    const passwordHash = crypto.createHash('sha256').update(newPassword).digest('hex');
+    const passwordHash = await bcrypt.hash(newPassword, 12);
 
     const result = await passwordRecoveryService.resetPassword(token, passwordHash, ipAddress);
 

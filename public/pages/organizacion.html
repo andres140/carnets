@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organización — SENA Carnés</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/sena.css" rel="stylesheet">
+  <link href="/css/organizacion.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="/dashboard.html"><i class="bi bi-person-badge me-2"></i>SENA Carnés</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/usuarios.html">Usuarios</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/organizacion.html">Organización</a></li>
+          <li class="nav-item"><a class="nav-link" href="/carnets.html">Carnés</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-3">
+          <span class="text-white-50 small d-none d-md-inline" id="userName"></span>
+          <button class="btn btn-outline-light btn-sm" id="btnLogout"><i class="bi bi-box-arrow-right"></i> Salir</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container-fluid py-4">
+    <div class="mb-4">
+      <h1 class="h3 fw-bold mb-1">Estructura organizacional</h1>
+      <p class="text-muted mb-0">Regionales, centros, dependencias, roles y permisos del sistema</p>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabRegionales">Regionales</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCentros">Centros</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDependencias">Dependencias</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabRoles">Roles</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPermisos">Permisos</button></li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Regionales -->
+      <div class="tab-pane fade show active" id="tabRegionales">
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <form id="formFiltroRegionales" class="row g-2 align-items-end">
+            <div class="col-md-4"><label class="form-label small">Buscar</label><input type="text" class="form-control" id="filtroRegionalSearch" placeholder="Código o nombre"></div>
+            <div class="col-md-2"><label class="form-label small">Estado</label><select class="form-select" id="filtroRegionalEstado"><option value="">Todos</option><option value="1">Activo</option><option value="0">Inactivo</option></select></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Buscar</button></div>
+            <div class="col-md-4 text-md-end"><button type="button" class="btn btn-success" id="btnNuevaRegional"><i class="bi bi-plus-lg me-1"></i>Nueva regional</button></div>
+          </form>
+        </div></div>
+        <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover table-org mb-0"><thead class="table-light"><tr><th>Código</th><th>Nombre</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="tablaRegionales"></tbody></table></div>
+        <div class="card-footer d-flex justify-content-between align-items-center"><span class="small text-muted" id="pagRegionalesInfo">—</span><ul class="pagination pagination-sm mb-0" id="pagRegionales"></ul></div></div>
+      </div>
+
+      <!-- Centros -->
+      <div class="tab-pane fade" id="tabCentros">
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <form id="formFiltroCentros" class="row g-2 align-items-end">
+            <div class="col-md-3"><label class="form-label small">Buscar</label><input type="text" class="form-control" id="filtroCentroSearch"></div>
+            <div class="col-md-3"><label class="form-label small">Regional</label><select class="form-select" id="filtroCentroRegional"><option value="">Todas</option></select></div>
+            <div class="col-md-2"><label class="form-label small">Estado</label><select class="form-select" id="filtroCentroEstado"><option value="">Todos</option><option value="1">Activo</option><option value="0">Inactivo</option></select></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Buscar</button></div>
+            <div class="col-md-2 text-md-end"><button type="button" class="btn btn-success" id="btnNuevoCentro"><i class="bi bi-plus-lg"></i> Nuevo</button></div>
+          </form>
+        </div></div>
+        <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover table-org mb-0"><thead class="table-light"><tr><th>Código</th><th>Nombre</th><th>Regional</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="tablaCentros"></tbody></table></div>
+        <div class="card-footer d-flex justify-content-between"><span class="small text-muted" id="pagCentrosInfo">—</span><ul class="pagination pagination-sm mb-0" id="pagCentros"></ul></div></div>
+      </div>
+
+      <!-- Dependencias -->
+      <div class="tab-pane fade" id="tabDependencias">
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <form id="formFiltroDependencias" class="row g-2 align-items-end">
+            <div class="col-md-3"><label class="form-label small">Buscar</label><input type="text" class="form-control" id="filtroDepSearch"></div>
+            <div class="col-md-2"><label class="form-label small">Regional</label><select class="form-select" id="filtroDepRegional"><option value="">Todas</option></select></div>
+            <div class="col-md-2"><label class="form-label small">Centro</label><select class="form-select" id="filtroDepCentro" disabled><option value="">— Regional —</option></select></div>
+            <div class="col-md-2"><label class="form-label small">Estado</label><select class="form-select" id="filtroDepEstado"><option value="">Todos</option><option value="1">Activo</option><option value="0">Inactivo</option></select></div>
+            <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">Buscar</button></div>
+            <div class="col-md-2 text-md-end"><button type="button" class="btn btn-success" id="btnNuevaDependencia">Nueva</button></div>
+          </form>
+        </div></div>
+        <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover table-org mb-0"><thead class="table-light"><tr><th>Nombre</th><th>Centro</th><th>Regional</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="tablaDependencias"></tbody></table></div>
+        <div class="card-footer d-flex justify-content-between"><span class="small text-muted" id="pagDependenciasInfo">—</span><ul class="pagination pagination-sm mb-0" id="pagDependencias"></ul></div></div>
+      </div>
+
+      <!-- Roles -->
+      <div class="tab-pane fade" id="tabRoles">
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <form id="formFiltroRoles" class="row g-2 align-items-end">
+            <div class="col-md-4"><label class="form-label small">Buscar</label><input type="text" class="form-control" id="filtroRolSearch"></div>
+            <div class="col-md-2"><label class="form-label small">Estado</label><select class="form-select" id="filtroRolEstado"><option value="">Todos</option><option value="1">Activo</option><option value="0">Inactivo</option></select></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Buscar</button></div>
+            <div class="col-md-4 text-md-end"><button type="button" class="btn btn-success" id="btnNuevoRol"><i class="bi bi-plus-lg me-1"></i>Nuevo rol</button></div>
+          </form>
+        </div></div>
+        <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover table-org mb-0"><thead class="table-light"><tr><th>Nombre</th><th>Descripción</th><th>Usuarios</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="tablaRoles"></tbody></table></div>
+        <div class="card-footer d-flex justify-content-between"><span class="small text-muted" id="pagRolesInfo">—</span><ul class="pagination pagination-sm mb-0" id="pagRoles"></ul></div></div>
+      </div>
+
+      <!-- Permisos -->
+      <div class="tab-pane fade" id="tabPermisos">
+        <div class="row g-3">
+          <div class="col-lg-7">
+            <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+              <form id="formFiltroPermisos" class="row g-2 align-items-end">
+                <div class="col-md-6"><input type="text" class="form-control" id="filtroPermSearch" placeholder="Buscar permiso"></div>
+                <div class="col-md-3"><button type="submit" class="btn btn-primary w-100">Buscar</button></div>
+                <div class="col-md-3"><button type="button" class="btn btn-success w-100" id="btnNuevoPermiso">Nuevo permiso</button></div>
+              </form>
+            </div></div>
+            <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover table-org mb-0"><thead class="table-light"><tr><th>Código</th><th>Nombre</th><th>Roles</th><th class="text-end">Acciones</th></tr></thead><tbody id="tablaPermisos"></tbody></table></div>
+            <div class="card-footer d-flex justify-content-between"><span class="small text-muted" id="pagPermisosInfo">—</span><ul class="pagination pagination-sm mb-0" id="pagPermisos"></ul></div></div>
+          </div>
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white"><strong>Asignar permisos a rol</strong></div>
+              <div class="card-body">
+                <label class="form-label small">Seleccionar rol</label>
+                <select class="form-select mb-3" id="permRolSelect"><option value="">— Seleccionar rol —</option></select>
+                <p class="small text-muted mb-2">Rol: <span id="permRolNombre">—</span></p>
+                <p class="small text-muted">Use el botón <i class="bi bi-shield-check"></i> en la tabla de roles para editar permisos con más detalle.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modales -->
+  <div class="modal fade" id="modalRegional" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <form id="formRegional"><div class="modal-header"><h5 class="modal-title" id="modalRegionalTitulo">Regional</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><input type="hidden" id="regionalId">
+      <div class="mb-3"><label class="form-label">Código *</label><input type="text" class="form-control" id="regionalCodigo" required maxlength="10"></div>
+      <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control" id="regionalNombre" required maxlength="200"></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div></form>
+  </div></div></div>
+
+  <div class="modal fade" id="modalCentro" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <form id="formCentro"><div class="modal-header"><h5 class="modal-title" id="modalCentroTitulo">Centro</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><input type="hidden" id="centroId">
+      <div class="mb-3"><label class="form-label">Regional *</label><select class="form-select" id="centroRegionalId" required></select></div>
+      <div class="mb-3"><label class="form-label">Código *</label><input type="text" class="form-control" id="centroCodigo" required maxlength="20"></div>
+      <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control" id="centroNombre" required maxlength="200"></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div></form>
+  </div></div></div>
+
+  <div class="modal fade" id="modalDependencia" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <form id="formDependencia"><div class="modal-header"><h5 class="modal-title" id="modalDependenciaTitulo">Dependencia</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><input type="hidden" id="dependenciaId">
+      <div class="mb-3"><label class="form-label">Regional *</label><select class="form-select" id="depRegionalId" required></select></div>
+      <div class="mb-3"><label class="form-label">Centro *</label><select class="form-select" id="depCentroId" required disabled><option value="">— Regional —</option></select></div>
+      <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control" id="dependenciaNombre" required maxlength="200"></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div></form>
+  </div></div></div>
+
+  <div class="modal fade" id="modalRol" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <form id="formRol"><div class="modal-header"><h5 class="modal-title" id="modalRolTitulo">Rol</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><input type="hidden" id="rolId">
+      <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control" id="rolNombre" required maxlength="50"></div>
+      <div class="mb-3"><label class="form-label">Descripción</label><textarea class="form-control" id="rolDescripcion" rows="2" maxlength="500"></textarea></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div></form>
+  </div></div></div>
+
+  <div class="modal fade" id="modalPermiso" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <form id="formPermiso"><div class="modal-header"><h5 class="modal-title" id="modalPermisoTitulo">Permiso</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><input type="hidden" id="permisoId">
+      <div class="mb-3"><label class="form-label">Código *</label><input type="text" class="form-control" id="permisoCodigo" required maxlength="100" placeholder="ej. carnets.exportar"></div>
+      <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control" id="permisoNombre" required maxlength="200"></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div></form>
+  </div></div></div>
+
+  <div class="modal fade" id="modalPermisosRol" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Permisos del rol: <span id="permRolNombreModal"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body permisos-grid" id="permisosGrid"></div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" id="btnGuardarPermisosRol">Guardar permisos</button></div>
+  </div></div></div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/organizacion.js"></script>
+</body>
+</html>

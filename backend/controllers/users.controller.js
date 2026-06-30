@@ -1,33 +1,28 @@
 const usersService = require('../services/users.service');
-const catalogService = require('../services/catalog.service');
-const auditoriaService = require('../services/auditoriaService');
+const auditoriaService = require('../services/auditoria.service');
+const { getClientIp } = require('../utils/request');
+const { parseUserBody } = require('../utils/mappers');
+const { asyncHandler } = require('../utils/asyncHandler');
+const { computeUserChanges } = require('../utils/diff');
 
-function getClientIp(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+function actorFromSession(req) {
+  return req.session?.user || null;
 }
 
-function parseUserBody(req) {
-  const body = req.body || {};
-  return {
-    documento: body.documento?.trim(),
-    tipoDocumento: body.tipoDocumento || 'CC',
-    nombres: body.nombres?.trim(),
-    apellidos: body.apellidos?.trim(),
-    email: body.email?.trim(),
-    telefono: body.telefono?.trim(),
-    password: body.password,
-    rolId: body.rolId,
-    regionalId: body.regionalId || null,
-    centroId: body.centroId || null,
-    dependenciaId: body.dependenciaId || null,
-    estado: body.estado || 'ACTIVO',
-    fotoUrl: req.file ? `/uploads/${req.file.filename}` : body.fotoUrl,
-  };
+async function logUserAction(req, accion, user, detalle = null) {
+  await auditoriaService.log({
+    usuarioId: req.session.user.id,
+    accion,
+    entidad: 'Usuario',
+    entidadId: user.id,
+    detalle,
+    ip: getClientIp(req),
+  });
 }
 
-async function list(req, res, next) {
-  try {
-    const result = await usersService.list({
+const list = asyncHandler(async (req, res) => {
+  const result = await usersService.list(
+    {
       page: req.query.page,
       limit: req.query.limit,
       search: req.query.search,
@@ -38,152 +33,82 @@ async function list(req, res, next) {
       estado: req.query.estado,
       regionalId: req.query.regionalId,
       centroId: req.query.centroId,
-    });
-    return res.json({ success: true, data: result });
-  } catch (err) {
-    next(err);
+      dependenciaId: req.query.dependenciaId,
+      tipoUsuario: req.query.tipoUsuario,
+    },
+    actorFromSession(req)
+  );
+  return res.json({ success: true, data: result });
+});
+
+const getOne = asyncHandler(async (req, res) => {
+  const user = await usersService.getById(req.params.id, actorFromSession(req));
+  if (!user) {
+    return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
   }
-}
+  return res.json({ success: true, data: user });
+});
 
-async function getOne(req, res, next) {
-  try {
-    const user = await usersService.getById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
-    }
-    return res.json({ success: true, data: user });
-  } catch (err) {
-    next(err);
+const create = asyncHandler(async (req, res) => {
+  const data = parseUserBody(req);
+  const user = await usersService.create(data, actorFromSession(req));
+  await logUserAction(req, 'CREAR', user, {
+    documento: user.documento,
+    email: user.email,
+    rolNombre: user.rolNombre,
+    tipoUsuario: user.tipoUsuario,
+  });
+  return res.status(201).json({
+    success: true,
+    data: user,
+    message: 'Usuario creado correctamente',
+  });
+});
+
+const update = asyncHandler(async (req, res) => {
+  const existing = await usersService.getById(req.params.id, actorFromSession(req));
+  if (!existing) {
+    return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
   }
-}
 
-async function create(req, res, next) {
-  try {
-    const data = parseUserBody(req);
-    const user = await usersService.create(data);
+  const data = parseUserBody(req);
+  const user = await usersService.update(req.params.id, data, actorFromSession(req));
+  const cambios = computeUserChanges(existing, user);
 
-    await auditoriaService.log({
-      usuarioId: req.session.user.id,
-      accion: 'CREAR',
-      entidad: 'Usuario',
-      entidadId: user.id,
-      detalle: { email: user.email, documento: user.documento },
-      ip: getClientIp(req),
-    });
+  await logUserAction(req, 'ACTUALIZAR', user, cambios || { mensaje: 'Sin cambios detectados' });
 
-    return res.status(201).json({
-      success: true,
-      data: user,
-      message: 'Usuario creado correctamente',
-    });
-  } catch (err) {
-    next(err);
-  }
-}
+  return res.json({
+    success: true,
+    data: user,
+    message: 'Usuario actualizado correctamente',
+  });
+});
 
-async function update(req, res, next) {
-  try {
-    const data = parseUserBody(req);
-    const user = await usersService.update(req.params.id, data);
+const deactivate = asyncHandler(async (req, res) => {
+  const user = await usersService.deactivate(req.params.id, actorFromSession(req));
+  await logUserAction(req, 'DESACTIVAR', user, {
+    estadoAnterior: 'ACTIVO',
+    estadoNuevo: user.estado,
+  });
+  return res.json({
+    success: true,
+    data: user,
+    message: 'Usuario desactivado correctamente',
+  });
+});
 
-    await auditoriaService.log({
-      usuarioId: req.session.user.id,
-      accion: 'ACTUALIZAR',
-      entidad: 'Usuario',
-      entidadId: user.id,
-      detalle: { email: user.email },
-      ip: getClientIp(req),
-    });
-
-    return res.json({
-      success: true,
-      data: user,
-      message: 'Usuario actualizado correctamente',
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function deactivate(req, res, next) {
-  try {
-    const user = await usersService.deactivate(req.params.id);
-
-    await auditoriaService.log({
-      usuarioId: req.session.user.id,
-      accion: 'DESACTIVAR',
-      entidad: 'Usuario',
-      entidadId: user.id,
-      ip: getClientIp(req),
-    });
-
-    return res.json({
-      success: true,
-      data: user,
-      message: 'Usuario desactivado correctamente',
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function reactivate(req, res, next) {
-  try {
-    const user = await usersService.reactivate(req.params.id);
-
-    await auditoriaService.log({
-      usuarioId: req.session.user.id,
-      accion: 'REACTIVAR',
-      entidad: 'Usuario',
-      entidadId: user.id,
-      ip: getClientIp(req),
-    });
-
-    return res.json({
-      success: true,
-      data: user,
-      message: 'Usuario reactivado correctamente',
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getRoles(_req, res, next) {
-  try {
-    const roles = await catalogService.getRoles();
-    return res.json({ success: true, data: roles });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getRegionales(_req, res, next) {
-  try {
-    const regionales = await catalogService.getRegionales();
-    return res.json({ success: true, data: regionales });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getCentros(req, res, next) {
-  try {
-    const centros = await catalogService.getCentros(req.query.regionalId);
-    return res.json({ success: true, data: centros });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getDependencias(req, res, next) {
-  try {
-    const dependencias = await catalogService.getDependencias(req.query.centroId);
-    return res.json({ success: true, data: dependencias });
-  } catch (err) {
-    next(err);
-  }
-}
+const reactivate = asyncHandler(async (req, res) => {
+  const user = await usersService.reactivate(req.params.id, actorFromSession(req));
+  await logUserAction(req, 'REACTIVAR', user, {
+    estadoAnterior: 'INACTIVO',
+    estadoNuevo: user.estado,
+  });
+  return res.json({
+    success: true,
+    data: user,
+    message: 'Usuario reactivado correctamente',
+  });
+});
 
 module.exports = {
   list,
@@ -192,8 +117,4 @@ module.exports = {
   update,
   deactivate,
   reactivate,
-  getRoles,
-  getRegionales,
-  getCentros,
-  getDependencias,
 };

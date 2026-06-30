@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Carné <%= codigoUnico %> — Reverso</title>
+  <style><%- styles %></style>
+</head>
+<body>
+  <div class="carnet-page carnet-back">
+    <div>
+      <h2>Información institucional</h2>
+      <p><strong>Dependencia:</strong> <%= dependenciaNombre || '—' %></p>
+      <p><strong>Expedición:</strong> <%= fechaExpedicionFmt %></p>
+      <p><strong>Vencimiento:</strong> <%= fechaVencimientoFmt %></p>
+      <p><strong>Código:</strong> <%= codigoUnico %></p>
+      <% if (validationUrl) { %>
+        <p style="margin-top:2mm;font-size:5pt;color:#666">Valide este carné escaneando el código QR o visitando el enlace institucional de verificación.</p>
+      <% } %>
+    </div>
+    <div class="legal">
+      Este documento es propiedad del SENA. Su uso indebido será sancionado conforme a la normativa vigente.
+      Escanee el código QR del anverso para verificar la autenticidad del carné en línea.
+      Emitido por: <%= emitidoPorNombre || 'Sistema' %>.
+    </div>
+  </div>
+</body>
+</html>

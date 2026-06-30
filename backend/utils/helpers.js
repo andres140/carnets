@@ -11,6 +11,7 @@ function pickUserSession(user, permisos = []) {
     email: user.email,
     nombreCompleto: user.nombre_completo,
     tipoUsuario: user.tipo_usuario,
+    estado: user.estado,
     rolId: user.rol_id,
     rolNombre: user.rol_nombre,
     regionalId: user.regional_id,

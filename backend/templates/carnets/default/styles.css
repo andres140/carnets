@@ -1,0 +1,217 @@
+/* Carné SENA — estilos de plantilla (anverso/reverso) */
+@page {
+  size: 85.6mm 53.98mm;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+  color: #1a1a1a;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.carnet-page {
+  width: 85.6mm;
+  height: 53.98mm;
+  overflow: hidden;
+  page-break-after: always;
+  position: relative;
+  background: #fff;
+}
+
+.carnet-page:last-child {
+  page-break-after: auto;
+}
+
+.carnet-front {
+  border: 1.2px solid #0066cc;
+  border-radius: 3mm;
+}
+
+.carnet-header {
+  background: linear-gradient(135deg, #0066cc 0%, #004c99 100%);
+  color: #fff;
+  padding: 2.5mm 3mm;
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  height: 14mm;
+}
+
+.carnet-logo {
+  width: 9mm;
+  height: 9mm;
+  border-radius: 1.5mm;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5pt;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.1;
+  flex-shrink: 0;
+}
+
+.carnet-header-text .institucion {
+  font-size: 6.5pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.carnet-header-text .subtitulo {
+  font-size: 5.5pt;
+  opacity: 0.92;
+}
+
+.carnet-body {
+  display: grid;
+  grid-template-columns: 22mm 1fr;
+  gap: 2.5mm;
+  padding: 2.5mm 3mm;
+  height: calc(53.98mm - 14mm - 11mm);
+}
+
+.carnet-photo {
+  width: 22mm;
+  height: 28mm;
+  object-fit: cover;
+  border-radius: 1.5mm;
+  border: 0.4mm solid #dee2e6;
+  background: #f8f9fa;
+}
+
+.carnet-photo-placeholder {
+  width: 22mm;
+  height: 28mm;
+  border-radius: 1.5mm;
+  border: 0.4mm dashed #ced4da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5pt;
+  color: #6c757d;
+  text-align: center;
+  background: #f8f9fa;
+}
+
+.carnet-field-label {
+  font-size: 4.5pt;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.3mm;
+}
+
+.carnet-field-value {
+  font-size: 6.5pt;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 1.5mm;
+}
+
+.carnet-field-value.small {
+  font-size: 5.5pt;
+  font-weight: 500;
+}
+
+.carnet-footer {
+  display: grid;
+  grid-template-columns: 1fr 16mm 16mm;
+  gap: 2mm;
+  padding: 0 3mm 2.5mm;
+  align-items: end;
+  height: 11mm;
+}
+
+.carnet-code {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 6pt;
+  font-weight: 700;
+  color: #0066cc;
+}
+
+.carnet-qr-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 9mm;
+  width: 16mm;
+}
+
+.carnet-qr-image {
+  width: 9mm;
+  height: 9mm;
+  object-fit: contain;
+  border-radius: 0.5mm;
+}
+
+.carnet-placeholder-box {
+  height: 9mm;
+  border: 0.4mm dashed #adb5bd;
+  border-radius: 1mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.5pt;
+  color: #6c757d;
+  text-align: center;
+  background: #f8f9fa;
+}
+
+.carnet-back {
+  border: 1.2px solid #0066cc;
+  border-radius: 3mm;
+  padding: 4mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.carnet-back h2 {
+  font-size: 7pt;
+  color: #0066cc;
+  margin-bottom: 2mm;
+}
+
+.carnet-back p {
+  font-size: 5.5pt;
+  line-height: 1.45;
+  color: #333;
+}
+
+.carnet-back .legal {
+  font-size: 4.5pt;
+  color: #666;
+  border-top: 0.3mm solid #dee2e6;
+  padding-top: 2mm;
+}
+
+.carnet-estado-badge {
+  position: absolute;
+  top: 3mm;
+  right: 3mm;
+  font-size: 5pt;
+  font-weight: 700;
+  padding: 0.8mm 1.5mm;
+  border-radius: 1mm;
+  text-transform: uppercase;
+}
+
+.estado-ACTIVO { background: #d4edda; color: #155724; }
+.estado-VENCIDO { background: #fff3cd; color: #856404; }
+.estado-SUSPENDIDO { background: #cce5ff; color: #004085; }
+.estado-REVOCADO { background: #f8d7da; color: #721c24; }
+
+@media print {
+  body { margin: 0; }
+  .carnet-page { page-break-after: always; }
+  .no-print { display: none !important; }
+}

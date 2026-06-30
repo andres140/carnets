@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carnés — SENA Carnés</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/sena.css" rel="stylesheet">
+  <link href="/css/carnets.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="/dashboard.html"><i class="bi bi-person-badge me-2"></i>SENA Carnés</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/usuarios.html">Usuarios</a></li>
+          <li class="nav-item"><a class="nav-link" href="/organizacion.html">Organización</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/carnets.html">Carnés</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-3">
+          <span class="text-white-50 small d-none d-md-inline" id="userName"></span>
+          <button class="btn btn-outline-light btn-sm" id="btnLogout"><i class="bi bi-box-arrow-right"></i> Salir</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+      <div>
+        <h1 class="h3 fw-bold mb-1">Gestión de carnés</h1>
+        <p class="text-muted mb-0">Emisión, consulta y administración de carnés institucionales</p>
+      </div>
+      <button class="btn btn-primary" id="btnEmitirCarnet"><i class="bi bi-plus-circle me-1"></i> Emitir carné</button>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form id="formFiltros" class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label small">Búsqueda</label>
+            <input type="text" class="form-control" id="filtroSearch" placeholder="Código, nombre o documento">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small">Estado</label>
+            <select class="form-select" id="filtroEstado">
+              <option value="">Todos</option>
+              <option value="ACTIVO">Activo</option>
+              <option value="VENCIDO">Vencido</option>
+              <option value="SUSPENDIDO">Suspendido</option>
+              <option value="REVOCADO">Revocado</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1"></i> Buscar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover table-carnets mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Código</th>
+              <th>Titular</th>
+              <th>Documento</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Expedición</th>
+              <th>Vencimiento</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaCarnets">
+            <tr><td colspan="8" class="text-center py-4 text-muted">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span class="text-muted small" id="paginacionInfo">—</span>
+        <nav><ul class="pagination pagination-sm mb-0" id="paginacion"></ul></nav>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal emitir -->
+  <div class="modal fade" id="modalEmitir" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Emitir carné</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="emitirAlert" class="alert alert-danger d-none"></div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-8">
+              <label class="form-label">Buscar usuario activo</label>
+              <input type="text" class="form-control" id="buscarUsuario" placeholder="Nombre o documento">
+              <div class="list-group mt-2 d-none" id="listaUsuarios"></div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Fecha vencimiento</label>
+              <input type="date" class="form-control" id="fechaVencimiento">
+            </div>
+          </div>
+          <input type="hidden" id="usuarioSeleccionadoId">
+          <div id="previewEmitir" class="preview-container d-none"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-outline-primary" id="btnVerPreview" disabled>Vista previa</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarEmitir" disabled>
+            <span class="spinner-border spinner-border-sm d-none me-1" id="emitirSpinner"></span>
+            Emitir carné
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal detalle -->
+  <div class="modal fade" id="modalDetalle" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Detalle del carné</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6"><div id="previewDetalle" class="preview-container"></div></div>
+            <div class="col-md-6">
+              <div id="detalleInfo"></div>
+              <hr>
+              <h6 class="fw-bold">Historial de estados</h6>
+              <div id="detalleHistorial" class="small"></div>
+              <hr>
+              <h6 class="fw-bold">Documento (PDF)</h6>
+              <div id="detalleDocumento" class="small text-muted">—</div>
+              <div id="detalleDocHistorial" class="small mt-2"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer flex-wrap" id="detalleAcciones"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal motivo -->
+  <div class="modal fade" id="modalMotivo" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="modalMotivoTitulo">Motivo</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <textarea class="form-control" id="motivoTexto" rows="3" placeholder="Indique el motivo"></textarea>
+          <div class="form-check mt-2 d-none" id="wrapSyncFoto">
+            <input class="form-check-input" type="checkbox" id="syncFotoCheck">
+            <label class="form-check-label" for="syncFotoCheck">Sincronizar datos y foto del usuario</label>
+          </div>
+          <input type="date" class="form-control mt-2 d-none" id="renovarFecha">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarMotivo">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/carnets.js"></script>
+</body>
+</html>

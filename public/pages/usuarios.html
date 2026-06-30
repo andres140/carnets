@@ -22,7 +22,8 @@
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="/dashboard.html">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link active" href="/usuarios.html">Usuarios</a></li>
-          <li class="nav-item"><a class="nav-link disabled" href="#">Carnés</a></li>
+          <li class="nav-item"><a class="nav-link" href="/organizacion.html">Organización</a></li>
+          <li class="nav-item"><a class="nav-link" href="/carnets.html">Carnés</a></li>
           <li class="nav-item"><a class="nav-link" href="/validar.html">Validar QR</a></li>
         </ul>
         <div class="d-flex align-items-center gap-3">
@@ -50,29 +51,41 @@
     <div class="card border-0 shadow-sm filters-card mb-4">
       <div class="card-body">
         <form id="formFiltros" class="row g-3 align-items-end">
-          <div class="col-md-3">
+          <div class="col-lg-3 col-md-4">
             <label class="form-label small">Búsqueda general</label>
             <input type="text" class="form-control" id="filtroSearch" placeholder="Documento, nombre o correo">
           </div>
-          <div class="col-md-2">
+          <div class="col-lg-2 col-md-3">
             <label class="form-label small">Documento</label>
             <input type="text" class="form-control" id="filtroDocumento">
           </div>
-          <div class="col-md-2">
+          <div class="col-lg-2 col-md-3">
             <label class="form-label small">Nombre</label>
             <input type="text" class="form-control" id="filtroNombre">
           </div>
-          <div class="col-md-2">
+          <div class="col-lg-2 col-md-3">
             <label class="form-label small">Correo</label>
             <input type="text" class="form-control" id="filtroEmail">
           </div>
-          <div class="col-md-1">
+          <div class="col-lg-2 col-md-3">
+            <label class="form-label small">Tipo de usuario</label>
+            <select class="form-select" id="filtroTipoUsuario">
+              <option value="">Todos</option>
+              <option value="ADMINISTRADOR">Administrador</option>
+              <option value="COORDINADOR">Coordinador</option>
+              <option value="FUNCIONARIO">Funcionario</option>
+              <option value="INSTRUCTOR">Instructor</option>
+              <option value="APRENDIZ">Aprendiz</option>
+              <option value="CONTRATISTA">Contratista</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-3">
             <label class="form-label small">Rol</label>
             <select class="form-select" id="filtroRol">
               <option value="">Todos</option>
             </select>
           </div>
-          <div class="col-md-1">
+          <div class="col-lg-2 col-md-3">
             <label class="form-label small">Estado</label>
             <select class="form-select" id="filtroEstado">
               <option value="">Todos</option>
@@ -81,9 +94,27 @@
               <option value="SUSPENDIDO">Suspendido</option>
             </select>
           </div>
-          <div class="col-md-1 d-flex gap-2">
-            <button type="submit" class="btn btn-primary w-100">
-              <i class="bi bi-search"></i>
+          <div class="col-lg-2 col-md-3">
+            <label class="form-label small">Regional</label>
+            <select class="form-select" id="filtroRegional">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-3">
+            <label class="form-label small">Centro</label>
+            <select class="form-select" id="filtroCentro" disabled>
+              <option value="">— Regional —</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-3">
+            <label class="form-label small">Dependencia</label>
+            <select class="form-select" id="filtroDependencia" disabled>
+              <option value="">— Centro —</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+              <i class="bi bi-search me-1"></i> Buscar
             </button>
             <button type="button" class="btn btn-outline-secondary" id="btnLimpiarFiltros" title="Limpiar">
               <i class="bi bi-x-lg"></i>
@@ -103,6 +134,7 @@
                 <th>Foto</th>
                 <th>Documento</th>
                 <th>Nombre completo</th>
+                <th>Correo</th>
                 <th>Rol</th>
                 <th>Estado</th>
                 <th>Centro</th>
@@ -111,7 +143,7 @@
               </tr>
             </thead>
             <tbody id="tablaUsuarios">
-              <tr><td colspan="8" class="text-center py-4 text-muted">Cargando...</td></tr>
+              <tr><td colspan="9" class="text-center py-4 text-muted">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -146,6 +178,7 @@
                   <option value="CE">C.E.</option>
                   <option value="TI">T.I.</option>
                   <option value="PA">Pasaporte</option>
+                  <option value="PEP">PEP</option>
                 </select>
               </div>
               <div class="col-md-8">
@@ -208,6 +241,7 @@
                 <div class="d-flex align-items-center gap-3">
                   <img src="" alt="" class="photo-preview d-none" id="fotoPreview">
                   <input type="file" class="form-control" id="foto" accept="image/jpeg,image/png,image/webp">
+                  <div class="form-text">JPEG, PNG o WebP. Máximo 5 MB.</div>
                 </div>
               </div>
             </div>
@@ -223,6 +257,8 @@
       </div>
     </div>
   </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/api.js"></script>

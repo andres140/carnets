@@ -1,3 +1,5 @@
+const { hasPermission } = require('../utils/permissions');
+
 function isApiRequest(req) {
   return (
     req.originalUrl.startsWith('/api') ||
@@ -6,13 +8,29 @@ function isApiRequest(req) {
   );
 }
 
-function requireAuth(req, res, next) {
-  if (req.session?.user) return next();
-
-  if (isApiRequest(req)) {
-    return res.status(401).json({ success: false, error: 'No autorizado' });
+function assertActiveUser(user, res, isApi) {
+  if (!user) return false;
+  if (user.estado && user.estado !== 'ACTIVO') {
+    if (isApi) {
+      res.status(403).json({ success: false, error: 'Usuario inactivo o suspendido' });
+    } else {
+      res.status(403).send('Acceso denegado');
+    }
+    return false;
   }
-  return res.redirect('/login.html');
+  return true;
+}
+
+function requireAuth(req, res, next) {
+  if (!req.session?.user) {
+    if (isApiRequest(req)) {
+      return res.status(401).json({ success: false, error: 'No autorizado' });
+    }
+    return res.redirect('/login.html');
+  }
+
+  if (!assertActiveUser(req.session.user, res, isApiRequest(req))) return;
+  next();
 }
 
 function requirePermission(...permisos) {
@@ -21,8 +39,9 @@ function requirePermission(...permisos) {
       return res.status(401).json({ success: false, error: 'No autorizado' });
     }
 
-    const userPermisos = req.session.user.permisos || [];
-    const allowed = permisos.some((p) => userPermisos.includes(p));
+    if (!assertActiveUser(req.session.user, res, true)) return;
+
+    const allowed = permisos.some((p) => hasPermission(req.session.user, p));
 
     if (!allowed) {
       return res.status(403).json({ success: false, error: 'Sin permisos' });
@@ -40,6 +59,8 @@ function requireRole(...roles) {
       }
       return res.redirect('/login.html');
     }
+
+    if (!assertActiveUser(req.session.user, res, isApiRequest(req))) return;
 
     const userRole = req.session.user.rolNombre;
     if (!roles.includes(userRole)) {

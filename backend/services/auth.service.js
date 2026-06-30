@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs');
-const { query } = require('../config/database');
+const usersRepository = require('../repositories/users.repository');
 const { pickUserSession } = require('../utils/helpers');
 
 async function getPermisosByRolId(rolId) {
+  const { query } = require('../config/database');
   const rows = await query(
     `SELECT p.codigo FROM permisos p
      INNER JOIN rol_permisos rp ON rp.permiso_id = p.id
@@ -13,6 +14,7 @@ async function getPermisosByRolId(rolId) {
 }
 
 async function findByEmail(email) {
+  const { query } = require('../config/database');
   const rows = await query(
     `SELECT u.*, r.nombre AS rol_nombre
      FROM usuarios u
@@ -35,18 +37,11 @@ async function authenticate(email, password) {
 }
 
 async function getById(id) {
-  const rows = await query(
-    `SELECT u.*, r.nombre AS rol_nombre
-     FROM usuarios u
-     INNER JOIN roles r ON r.id = u.rol_id
-     WHERE u.id = ? LIMIT 1`,
-    [id]
-  );
-  const user = rows[0];
-  if (!user) return null;
+  const row = await usersRepository.findById(id);
+  if (!row) return null;
 
-  const permisos = await getPermisosByRolId(user.rol_id);
-  return pickUserSession(user, permisos);
+  const permisos = await getPermisosByRolId(row.rol_id);
+  return pickUserSession(row, permisos);
 }
 
 module.exports = { authenticate, getById, findByEmail };

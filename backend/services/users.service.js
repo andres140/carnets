@@ -1,34 +1,10 @@
 const bcrypt = require('bcryptjs');
-const { query } = require('../config/database');
+const { ROL_TO_TIPO, ROLES } = require('../constants');
+const usersRepository = require('../repositories/users.repository');
 const { generateId } = require('../utils/helpers');
-
-const ROL_TO_TIPO = {
-  ADMINISTRADOR: 'ADMINISTRADOR',
-  COORDINADOR: 'COORDINADOR',
-  FUNCIONARIO: 'FUNCIONARIO',
-  INSTRUCTOR: 'INSTRUCTOR',
-  APRENDIZ: 'APRENDIZ',
-  CONTRATISTA: 'CONTRATISTA',
-};
-
-const USER_SELECT = `
-  u.id, u.email, u.documento, u.tipo_documento, u.nombre_completo,
-  u.foto_url, u.telefono, u.estado, u.tipo_usuario,
-  u.rol_id, u.regional_id, u.centro_id, u.dependencia_id,
-  u.created_at, u.updated_at, u.deactivated_at,
-  r.nombre AS rol_nombre,
-  reg.nombre AS regional_nombre,
-  c.nombre AS centro_nombre,
-  d.nombre AS dependencia_nombre
-`;
-
-const USER_FROM = `
-  FROM usuarios u
-  INNER JOIN roles r ON r.id = u.rol_id
-  LEFT JOIN regionales reg ON reg.id = u.regional_id
-  LEFT JOIN centros_formacion c ON c.id = u.centro_id
-  LEFT JOIN dependencias d ON d.id = u.dependencia_id
-`;
+const { parsePagination, buildPaginationMeta } = require('../utils/pagination');
+const { applyUserListScope, canAccessUser } = require('../utils/permissions');
+const { createAppError } = require('../utils/errors');
 
 function splitNombreCompleto(nombreCompleto) {
   const parts = (nombreCompleto || '').trim().split(/\s+/);
@@ -67,247 +43,146 @@ function formatUser(row) {
   };
 }
 
-function buildWhereClause(filters) {
-  const conditions = [];
-  const params = [];
-
-  if (filters.documento) {
-    conditions.push('u.documento LIKE ?');
-    params.push(`%${filters.documento}%`);
+function assertCanAccess(actor, targetUser) {
+  if (!canAccessUser(actor, targetUser)) {
+    throw createAppError('Usuario no encontrado', 404);
   }
-  if (filters.nombre) {
-    conditions.push('u.nombre_completo LIKE ?');
-    params.push(`%${filters.nombre}%`);
-  }
-  if (filters.email) {
-    conditions.push('u.email LIKE ?');
-    params.push(`%${filters.email}%`);
-  }
-  if (filters.rolId) {
-    conditions.push('u.rol_id = ?');
-    params.push(filters.rolId);
-  }
-  if (filters.estado) {
-    conditions.push('u.estado = ?');
-    params.push(filters.estado);
-  }
-  if (filters.regionalId) {
-    conditions.push('u.regional_id = ?');
-    params.push(filters.regionalId);
-  }
-  if (filters.centroId) {
-    conditions.push('u.centro_id = ?');
-    params.push(filters.centroId);
-  }
-  if (filters.search) {
-    conditions.push(
-      '(u.documento LIKE ? OR u.nombre_completo LIKE ? OR u.email LIKE ?)'
-    );
-    const term = `%${filters.search}%`;
-    params.push(term, term, term);
-  }
-
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  return { where, params };
-}
-
-async function list(filters = {}) {
-  const page = Math.max(1, parseInt(filters.page, 10) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(filters.limit, 10) || 10));
-  const offset = (page - 1) * limit;
-
-  const { where, params } = buildWhereClause(filters);
-
-  const countRows = await query(
-    `SELECT COUNT(*) AS total FROM usuarios u ${where}`,
-    params
-  );
-  const total = countRows[0]?.total || 0;
-
-  const rows = await query(
-    `SELECT ${USER_SELECT} ${USER_FROM} ${where}
-     ORDER BY u.created_at DESC
-     LIMIT ${limit} OFFSET ${offset}`,
-    params
-  );
-
-  return {
-    items: rows.map(formatUser),
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit) || 1,
-    },
-  };
-}
-
-async function getById(id) {
-  const rows = await query(
-    `SELECT ${USER_SELECT} ${USER_FROM} WHERE u.id = ? LIMIT 1`,
-    [id]
-  );
-  return formatUser(rows[0]);
-}
-
-async function emailExists(email, excludeId = null) {
-  const sql = excludeId
-    ? 'SELECT id FROM usuarios WHERE email = ? AND id != ? LIMIT 1'
-    : 'SELECT id FROM usuarios WHERE email = ? LIMIT 1';
-  const params = excludeId ? [email, excludeId] : [email];
-  const rows = await query(sql, params);
-  return rows.length > 0;
-}
-
-async function documentoExists(documento, excludeId = null) {
-  const sql = excludeId
-    ? 'SELECT id FROM usuarios WHERE documento = ? AND id != ? LIMIT 1'
-    : 'SELECT id FROM usuarios WHERE documento = ? LIMIT 1';
-  const params = excludeId ? [documento, excludeId] : [documento];
-  const rows = await query(sql, params);
-  return rows.length > 0;
-}
-
-async function getRolById(rolId) {
-  const rows = await query('SELECT id, nombre FROM roles WHERE id = ? LIMIT 1', [rolId]);
-  return rows[0] || null;
 }
 
 async function validateForeignKeys({ regionalId, centroId, dependenciaId }) {
   if (regionalId) {
-    const rows = await query('SELECT id FROM regionales WHERE id = ? AND activo = 1 LIMIT 1', [
-      regionalId,
-    ]);
-    if (!rows.length) {
-      const err = new Error('Regional no válida');
-      err.status = 400;
-      throw err;
-    }
+    const regional = await usersRepository.findRegionalById(regionalId);
+    if (!regional) throw createAppError('Regional no válida', 400);
   }
   if (centroId) {
-    const rows = await query(
-      'SELECT id, regional_id FROM centros_formacion WHERE id = ? AND activo = 1 LIMIT 1',
-      [centroId]
-    );
-    if (!rows.length) {
-      const err = new Error('Centro de formación no válido');
-      err.status = 400;
-      throw err;
-    }
-    if (regionalId && rows[0].regional_id !== regionalId) {
-      const err = new Error('El centro no pertenece a la regional seleccionada');
-      err.status = 400;
-      throw err;
+    const centro = await usersRepository.findCentroById(centroId);
+    if (!centro) throw createAppError('Centro de formación no válido', 400);
+    if (regionalId && centro.regional_id !== regionalId) {
+      throw createAppError('El centro no pertenece a la regional seleccionada', 400);
     }
   }
   if (dependenciaId) {
-    const rows = await query(
-      'SELECT id, centro_id FROM dependencias WHERE id = ? AND activo = 1 LIMIT 1',
-      [dependenciaId]
-    );
-    if (!rows.length) {
-      const err = new Error('Dependencia no válida');
-      err.status = 400;
-      throw err;
-    }
-    if (centroId && rows[0].centro_id !== centroId) {
-      const err = new Error('La dependencia no pertenece al centro seleccionado');
-      err.status = 400;
-      throw err;
+    const dependencia = await usersRepository.findDependenciaById(dependenciaId);
+    if (!dependencia) throw createAppError('Dependencia no válida', 400);
+    if (centroId && dependencia.centro_id !== centroId) {
+      throw createAppError('La dependencia no pertenece al centro seleccionado', 400);
     }
   }
 }
 
-async function create(data) {
-  const rol = await getRolById(data.rolId);
-  if (!rol) {
-    const err = new Error('Rol no válido');
-    err.status = 400;
-    throw err;
+function assertCoordinatorAssignment(actor, data) {
+  if (actor?.tipoUsuario !== ROLES.COORDINADOR) return data;
+
+  if (!actor.regionalId) {
+    throw createAppError('Coordinador sin regional asignada', 403);
   }
 
-  if (await emailExists(data.email)) {
-    const err = new Error('El correo ya está registrado');
-    err.status = 409;
-    throw err;
-  }
-  if (await documentoExists(data.documento)) {
-    const err = new Error('El documento ya está registrado');
-    err.status = 409;
-    throw err;
+  if (data.regionalId && data.regionalId !== actor.regionalId) {
+    throw createAppError('No puede asignar usuarios fuera de su regional', 403);
   }
 
-  await validateForeignKeys(data);
+  return { ...data, regionalId: actor.regionalId };
+}
+
+async function list(filters = {}, actor = null) {
+  const scopedFilters = applyUserListScope(actor, filters);
+  const { page, limit, offset } = parsePagination(filters);
+
+  const total = await usersRepository.countUsers(scopedFilters);
+  const rows = await usersRepository.findMany(scopedFilters, { limit, offset });
+
+  return {
+    items: rows.map(formatUser),
+    pagination: buildPaginationMeta(page, limit, total),
+  };
+}
+
+async function getById(id, actor = null) {
+  const row = await usersRepository.findById(id);
+  const user = formatUser(row);
+  if (!user) return null;
+  assertCanAccess(actor, user);
+  return user;
+}
+
+async function create(data, actor = null) {
+  const scopedData = assertCoordinatorAssignment(actor, data);
+  const rol = await usersRepository.findRolById(scopedData.rolId);
+  if (!rol) throw createAppError('Rol no válido', 400);
+  if (!rol.activo) throw createAppError('El rol seleccionado está inactivo', 400);
+
+  if (await usersRepository.emailExists(scopedData.email)) {
+    throw createAppError('El correo ya está registrado', 409);
+  }
+  if (await usersRepository.documentoExists(scopedData.documento)) {
+    throw createAppError('El documento ya está registrado', 409);
+  }
+
+  await validateForeignKeys(scopedData);
 
   const id = generateId();
-  const nombreCompleto = `${data.nombres.trim()} ${data.apellidos.trim()}`.trim();
-  const passwordHash = await bcrypt.hash(data.password, 12);
+  const nombreCompleto = `${scopedData.nombres.trim()} ${scopedData.apellidos.trim()}`.trim();
+  const passwordHash = await bcrypt.hash(scopedData.password, 12);
   const tipoUsuario = ROL_TO_TIPO[rol.nombre] || 'FUNCIONARIO';
-  const estado = data.estado || 'ACTIVO';
+  const estado = scopedData.estado || 'ACTIVO';
 
-  await query(
-    `INSERT INTO usuarios (
-      id, email, password_hash, rol_id, tipo_usuario, estado,
-      documento, tipo_documento, nombre_completo, foto_url,
-      regional_id, centro_id, dependencia_id, telefono
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      data.email.trim().toLowerCase(),
-      passwordHash,
-      data.rolId,
-      tipoUsuario,
-      estado,
-      data.documento.trim(),
-      data.tipoDocumento || 'CC',
-      nombreCompleto,
-      data.fotoUrl || null,
-      data.regionalId || null,
-      data.centroId || null,
-      data.dependenciaId || null,
-      data.telefono?.trim() || null,
-    ]
-  );
+  await usersRepository.insertUser([
+    id,
+    scopedData.email.trim().toLowerCase(),
+    passwordHash,
+    scopedData.rolId,
+    tipoUsuario,
+    estado,
+    scopedData.documento.trim(),
+    scopedData.tipoDocumento || 'CC',
+    nombreCompleto,
+    scopedData.fotoUrl || null,
+    scopedData.regionalId || null,
+    scopedData.centroId || null,
+    scopedData.dependenciaId || null,
+    scopedData.telefono?.trim() || null,
+  ]);
 
-  return getById(id);
+  return getById(id, actor);
 }
 
-async function update(id, data) {
-  const existing = await getById(id);
-  if (!existing) {
-    const err = new Error('Usuario no encontrado');
-    err.status = 404;
-    throw err;
+async function update(id, data, actor = null) {
+  const existing = await getById(id, actor);
+  if (!existing) throw createAppError('Usuario no encontrado', 404);
+
+  const merged = {
+    ...data,
+    regionalId:
+      data.regionalId !== undefined ? data.regionalId || null : existing.regionalId,
+    centroId: data.centroId !== undefined ? data.centroId || null : existing.centroId,
+    dependenciaId:
+      data.dependenciaId !== undefined ? data.dependenciaId || null : existing.dependenciaId,
+  };
+
+  const scoped = assertCoordinatorAssignment(actor, merged);
+
+  if (scoped.email && (await usersRepository.emailExists(scoped.email, id))) {
+    throw createAppError('El correo ya está registrado', 409);
+  }
+  if (scoped.documento && (await usersRepository.documentoExists(scoped.documento, id))) {
+    throw createAppError('El documento ya está registrado', 409);
   }
 
-  if (data.email && (await emailExists(data.email, id))) {
-    const err = new Error('El correo ya está registrado');
-    err.status = 409;
-    throw err;
-  }
-  if (data.documento && (await documentoExists(data.documento, id))) {
-    const err = new Error('El documento ya está registrado');
-    err.status = 409;
-    throw err;
-  }
-
-  const rolId = data.rolId || existing.rolId;
-  const rol = await getRolById(rolId);
-  if (!rol) {
-    const err = new Error('Rol no válido');
-    err.status = 400;
-    throw err;
+  const rolId = scoped.rolId || existing.rolId;
+  const rol = await usersRepository.findRolById(rolId);
+  if (!rol) throw createAppError('Rol no válido', 400);
+  if (!rol.activo && rolId !== existing.rolId) {
+    throw createAppError('El rol seleccionado está inactivo', 400);
   }
 
   await validateForeignKeys({
-    regionalId: data.regionalId !== undefined ? data.regionalId : existing.regionalId,
-    centroId: data.centroId !== undefined ? data.centroId : existing.centroId,
-    dependenciaId:
-      data.dependenciaId !== undefined ? data.dependenciaId : existing.dependenciaId,
+    regionalId: scoped.regionalId,
+    centroId: scoped.centroId,
+    dependenciaId: scoped.dependenciaId,
   });
 
-  const nombres = data.nombres !== undefined ? data.nombres : existing.nombres;
-  const apellidos = data.apellidos !== undefined ? data.apellidos : existing.apellidos;
+  const nombres = scoped.nombres !== undefined ? scoped.nombres : existing.nombres;
+  const apellidos = scoped.apellidos !== undefined ? scoped.apellidos : existing.apellidos;
   const nombreCompleto = `${nombres.trim()} ${apellidos.trim()}`.trim();
   const tipoUsuario = ROL_TO_TIPO[rol.nombre] || existing.tipoUsuario;
 
@@ -324,82 +199,62 @@ async function update(id, data) {
     'dependencia_id = ?',
   ];
   const params = [
-    (data.email || existing.email).trim().toLowerCase(),
-    (data.documento || existing.documento).trim(),
-    data.tipoDocumento || existing.tipoDocumento,
+    (scoped.email || existing.email).trim().toLowerCase(),
+    (scoped.documento || existing.documento).trim(),
+    scoped.tipoDocumento || existing.tipoDocumento,
     nombreCompleto,
     rolId,
     tipoUsuario,
-    data.telefono !== undefined ? data.telefono?.trim() || null : existing.telefono,
-    data.regionalId !== undefined ? data.regionalId || null : existing.regionalId,
-    data.centroId !== undefined ? data.centroId || null : existing.centroId,
-    data.dependenciaId !== undefined ? data.dependenciaId || null : existing.dependenciaId,
+    scoped.telefono !== undefined ? scoped.telefono?.trim() || null : existing.telefono,
+    scoped.regionalId,
+    scoped.centroId,
+    scoped.dependenciaId,
   ];
 
-  if (data.estado) {
+  if (scoped.estado) {
     fields.push('estado = ?');
-    params.push(data.estado);
-    if (data.estado === 'INACTIVO') {
+    params.push(scoped.estado);
+    if (scoped.estado === 'INACTIVO') {
       fields.push('deactivated_at = NOW()');
-    } else if (data.estado === 'ACTIVO') {
+    } else if (scoped.estado === 'ACTIVO') {
       fields.push('deactivated_at = NULL');
     }
   }
 
-  if (data.fotoUrl !== undefined) {
+  if (scoped.fotoUrl !== undefined) {
     fields.push('foto_url = ?');
-    params.push(data.fotoUrl);
+    params.push(scoped.fotoUrl);
   }
 
-  if (data.password) {
+  if (scoped.password) {
     fields.push('password_hash = ?');
-    params.push(await bcrypt.hash(data.password, 12));
+    params.push(await bcrypt.hash(scoped.password, 12));
   }
 
-  params.push(id);
-  await query(`UPDATE usuarios SET ${fields.join(', ')} WHERE id = ?`, params);
-
-  return getById(id);
+  await usersRepository.updateUser(id, fields, params);
+  return getById(id, actor);
 }
 
-async function deactivate(id) {
-  const existing = await getById(id);
-  if (!existing) {
-    const err = new Error('Usuario no encontrado');
-    err.status = 404;
-    throw err;
-  }
+async function deactivate(id, actor = null) {
+  const existing = await getById(id, actor);
+  if (!existing) throw createAppError('Usuario no encontrado', 404);
   if (existing.estado === 'INACTIVO') {
-    const err = new Error('El usuario ya está inactivo');
-    err.status = 400;
-    throw err;
+    throw createAppError('El usuario ya está inactivo', 400);
   }
 
-  await query(
-    `UPDATE usuarios SET estado = 'INACTIVO', deactivated_at = NOW() WHERE id = ?`,
-    [id]
-  );
-  return getById(id);
+  await usersRepository.setEstadoInactivo(id);
+  return getById(id, actor);
 }
 
-async function reactivate(id) {
-  const existing = await getById(id);
-  if (!existing) {
-    const err = new Error('Usuario no encontrado');
-    err.status = 404;
-    throw err;
-  }
+async function reactivate(id, actor = null) {
+  const existing = await getById(id, actor);
+  if (!existing) throw createAppError('Usuario no encontrado', 404);
   if (existing.estado === 'ACTIVO') {
-    const err = new Error('El usuario ya está activo');
-    err.status = 400;
-    throw err;
+    throw createAppError('El usuario ya está activo', 400);
   }
 
-  await query(
-    `UPDATE usuarios SET estado = 'ACTIVO', deactivated_at = NULL WHERE id = ?`,
-    [id]
-  );
-  return getById(id);
+  await usersRepository.setEstadoActivo(id);
+  return getById(id, actor);
 }
 
 module.exports = {

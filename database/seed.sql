@@ -20,7 +20,14 @@ INSERT INTO permisos (id, codigo, nombre) VALUES
   ('perm-011', 'reportes.ver',         'Ver reportes'),
   ('perm-012', 'auditoria.ver',        'Ver auditoría'),
   ('perm-013', 'roles.gestionar',      'Gestionar roles'),
-  ('perm-014', 'config.gestionar',     'Gestionar configuración')
+  ('perm-014', 'config.gestionar',     'Gestionar configuración'),
+  ('perm-015', 'regionales.ver',       'Ver regionales'),
+  ('perm-016', 'regionales.gestionar', 'Gestionar regionales'),
+  ('perm-017', 'centros.ver',          'Ver centros'),
+  ('perm-018', 'centros.gestionar',    'Gestionar centros'),
+  ('perm-019', 'dependencias.ver',     'Ver dependencias'),
+  ('perm-020', 'dependencias.gestionar','Gestionar dependencias'),
+  ('perm-021', 'permisos.gestionar',   'Gestionar permisos')
 ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
 
 -- Roles
@@ -88,6 +95,7 @@ INSERT INTO usuarios (
   'usr-coord',
   'coord@sena.edu.co',
   '$2b$12$sv2GEZ.OA4P3Ea0Biz0Cl.x/Prl4776vMqK0e2Rj0ijKnv9BzzPmG',
+  'rol-coord',
   'COORDINADOR',
   'ACTIVO',
   '1000000002',

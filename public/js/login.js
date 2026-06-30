@@ -1,7 +1,7 @@
 /**
  * Login — Módulo de Autenticación (Frontend)
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('loginForm');
   const alertBox = document.getElementById('alertBox');
   const btnLogin = document.getElementById('btnLogin');
@@ -21,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLogin.disabled = loading;
     btnText.textContent = loading ? 'Ingresando...' : 'Iniciar sesión';
     btnSpinner.classList.toggle('d-none', !loading);
+  }
+
+  try {
+    await API.ensureCsrf();
+  } catch (err) {
+    showError(err.message || 'No se pudo preparar la sesión de login');
   }
 
   form.addEventListener('submit', async (e) => {

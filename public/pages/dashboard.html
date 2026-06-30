@@ -7,129 +7,138 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="/css/sena.css" rel="stylesheet">
+  <link href="/css/dashboard.css" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold" href="/dashboard.html">
-        <i class="bi bi-person-badge me-2"></i>SENA Carnés
+        <i class="bi bi-speedometer2 me-2"></i>SENA Carnés
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMain">
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav me-auto" id="navLinks">
           <li class="nav-item"><a class="nav-link active" href="/dashboard.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="/usuarios.html">Usuarios</a></li>
-          <li class="nav-item"><a class="nav-link disabled" href="#">Carnés</a></li>
+          <li class="nav-item nav-usuarios d-none"><a class="nav-link" href="/usuarios.html">Usuarios</a></li>
+          <li class="nav-item nav-organizacion d-none"><a class="nav-link" href="/organizacion.html">Organización</a></li>
+          <li class="nav-item nav-carnets d-none"><a class="nav-link" href="/carnets.html">Carnés</a></li>
           <li class="nav-item"><a class="nav-link" href="/validar.html">Validar QR</a></li>
         </ul>
         <div class="d-flex align-items-center gap-3">
           <span class="text-white-50 small d-none d-md-inline" id="userName"></span>
-          <button class="btn btn-outline-light btn-sm" id="btnLogout">
-            <i class="bi bi-box-arrow-right"></i> Salir
-          </button>
+          <button class="btn btn-outline-light btn-sm" id="btnLogout"><i class="bi bi-box-arrow-right"></i> Salir</button>
         </div>
       </div>
     </div>
   </nav>
 
   <main class="container-fluid py-4">
-    <div class="row mb-4">
-      <div class="col">
-        <h1 class="h3 fw-bold">Dashboard</h1>
-        <p class="text-muted">Resumen del sistema de carnés institucionales</p>
+    <div class="dashboard-hero mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <h1 class="h3 fw-bold mb-1">Dashboard ejecutivo</h1>
+        <p class="text-muted mb-0 small">Monitoreo en tiempo real del sistema de carnés institucionales</p>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-primary-subtle text-primary scope-badge" id="scopeLabel">—</span>
+        <div class="refresh-indicator mt-1" id="refreshInfo">Actualizando…</div>
       </div>
     </div>
 
-    <div class="row g-3 mb-4">
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card border-0 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex justify-content-between">
-              <div>
-                <p class="text-muted small mb-1">Usuarios</p>
-                <h2 class="fw-bold mb-0" id="statUsuarios">—</h2>
-              </div>
-              <div class="stat-icon bg-primary-subtle text-primary">
-                <i class="bi bi-people"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card border-0 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex justify-content-between">
-              <div>
-                <p class="text-muted small mb-1">Carnés activos</p>
-                <h2 class="fw-bold mb-0 text-success" id="statActivos">—</h2>
-              </div>
-              <div class="stat-icon bg-success-subtle text-success">
-                <i class="bi bi-check-circle"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card border-0 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex justify-content-between">
-              <div>
-                <p class="text-muted small mb-1">Vencidos</p>
-                <h2 class="fw-bold mb-0 text-warning" id="statVencidos">—</h2>
-              </div>
-              <div class="stat-icon bg-warning-subtle text-warning">
-                <i class="bi bi-exclamation-triangle"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card border-0 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex justify-content-between">
-              <div>
-                <p class="text-muted small mb-1">Próximos a vencer</p>
-                <h2 class="fw-bold mb-0 text-danger" id="statProximos">—</h2>
-              </div>
-              <div class="stat-icon bg-danger-subtle text-danger">
-                <i class="bi bi-clock-history"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Accesos rápidos -->
+    <section class="mb-4" id="seccionAccesos">
+      <h2 class="h6 text-muted text-uppercase mb-3">Accesos rápidos</h2>
+      <div class="row g-2" id="quickActions"></div>
+    </section>
 
-    <div class="row">
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white">
-            <h2 class="h6 mb-0">Bienvenido al sistema</h2>
+    <!-- Tarjetas resumen -->
+    <section class="mb-4" id="seccionResumen">
+      <h2 class="h6 text-muted text-uppercase mb-3">Indicadores clave</h2>
+      <div class="row g-3" id="statCards"></div>
+    </section>
+
+    <div class="row g-4">
+      <!-- Gráficas -->
+      <div class="col-xl-8" id="seccionGraficas">
+        <h2 class="h6 text-muted text-uppercase mb-3">Análisis y reportes</h2>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card chart-card border-0 shadow-sm">
+              <div class="card-body">
+                <h3 class="h6 fw-semibold">Carnés emitidos por mes</h3>
+                <div class="chart-wrap"><canvas id="chartCarnetsMes"></canvas></div>
+              </div>
+            </div>
           </div>
-          <div class="card-body">
-            <p>Módulos disponibles próximamente:</p>
-            <ul>
-              <li><strong>Módulo 2:</strong> <a href="/usuarios.html">Gestión de usuarios</a> (CRUD, búsqueda, filtros)</li>
-              <li><strong>Módulo 3:</strong> Carnés (generación, renovación, revocación)</li>
-              <li><strong>Módulo 4:</strong> QR (validación pública)</li>
-              <li><strong>Módulo 5:</strong> PDF (exportación e impresión)</li>
-              <li><strong>Módulo 6-7:</strong> Dashboard completo y reportes</li>
-            </ul>
-            <p class="mb-0 text-muted small">
-              Rol actual: <span id="userRole" class="fw-semibold"></span>
-            </p>
+          <div class="col-md-6">
+            <div class="card chart-card border-0 shadow-sm">
+              <div class="card-body">
+                <h3 class="h6 fw-semibold">Carnés por estado</h3>
+                <div class="chart-wrap"><canvas id="chartCarnetsEstado"></canvas></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card chart-card border-0 shadow-sm">
+              <div class="card-body">
+                <h3 class="h6 fw-semibold">Usuarios por tipo</h3>
+                <div class="chart-wrap"><canvas id="chartUsuariosTipo"></canvas></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card chart-card border-0 shadow-sm">
+              <div class="card-body">
+                <h3 class="h6 fw-semibold">Usuarios por regional</h3>
+                <div class="chart-wrap"><canvas id="chartUsuariosRegional"></canvas></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card chart-card border-0 shadow-sm">
+              <div class="card-body">
+                <h3 class="h6 fw-semibold">Validaciones QR por día</h3>
+                <div class="chart-wrap"><canvas id="chartValidaciones"></canvas></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card chart-card border-0 shadow-sm">
+              <div class="card-body">
+                <h3 class="h6 fw-semibold">Emisiones por centro</h3>
+                <div class="chart-wrap"><canvas id="chartCentros"></canvas></div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Alertas + Actividad -->
+      <div class="col-xl-4">
+        <section class="mb-4" id="seccionAlertas">
+          <h2 class="h6 text-muted text-uppercase mb-3">Alertas</h2>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body" id="alertasContainer">
+              <p class="text-muted small mb-0">Sin alertas activas</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="seccionActividad">
+          <h2 class="h6 text-muted text-uppercase mb-3">Actividad reciente</h2>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body" id="actividadContainer" style="max-height: 480px; overflow-y: auto">
+              <p class="text-muted small mb-0">Cargando…</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/dashboard.js"></script>
 </body>

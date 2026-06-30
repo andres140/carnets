@@ -38,6 +38,11 @@ const env = {
     maxSizeMb: parseInt(process.env.UPLOAD_MAX_MB || '5', 10),
   },
 
+  carnet: {
+    templateId: process.env.CARNET_TEMPLATE_ID || 'default',
+    pdfDir: process.env.CARNET_PDF_DIR || 'public/uploads/carnets',
+  },
+
   qr: {
     signingKey: process.env.QR_SIGNING_KEY || 'cambiar-qr-key-en-produccion',
   },

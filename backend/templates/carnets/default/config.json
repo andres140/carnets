@@ -1,0 +1,25 @@
+{
+  "id": "default",
+  "name": "Carné SENA — Plantilla institucional (temporal)",
+  "version": "1.0.0",
+  "description": "Plantilla reemplazable. Para usar diseño oficial, duplique esta carpeta y actualice CARNET_TEMPLATE_ID.",
+  "page": {
+    "widthMm": 85.6,
+    "heightMm": 53.98,
+    "dpi": 300
+  },
+  "sides": ["front", "back"],
+  "assets": {
+    "logo": null
+  },
+  "placeholders": {
+    "qr": { "enabled": true, "label": "Código QR de validación" },
+    "firma": { "enabled": true, "label": "Firma autorizada" },
+    "firmaDigital": { "enabled": false, "sprint": "futuro" }
+  },
+  "files": {
+    "front": "front.ejs",
+    "back": "back.ejs",
+    "styles": "styles.css"
+  }
+}

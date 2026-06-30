@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vista de impresión — Carné SENA</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #e9ecef;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #fff;
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .toolbar .hint {
+      font-size: 0.875rem;
+      color: #6c757d;
+      margin-left: auto;
+    }
+    #previewFrame {
+      display: block;
+      width: 100%;
+      min-height: calc(100vh - 60px);
+      border: 0;
+      background: #fff;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; }
+      #previewFrame {
+        min-height: auto;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <button type="button" id="btnImprimir" style="padding:0.4rem 1rem;background:#0d6efd;color:#fff;border:0;border-radius:4px;cursor:pointer">Imprimir</button>
+    <button type="button" id="btnCerrar" style="padding:0.4rem 1rem;background:#fff;border:1px solid #ced4da;border-radius:4px;cursor:pointer">Cerrar</button>
+    <span class="hint">Escala 100% · Márgenes: ninguno · Activar «Gráficos de fondo»</span>
+  </div>
+  <iframe id="previewFrame" title="Vista previa del carné"></iframe>
+  <script src="/js/api.js"></script>
+  <script>
+    (async function () {
+      const params = new URLSearchParams(window.location.search);
+      const carnetId = params.get('id');
+      const frame = document.getElementById('previewFrame');
+
+      if (!carnetId) {
+        document.body.innerHTML = '<p style="padding:2rem">Falta el identificador del carné.</p>';
+        return;
+      }
+
+      try {
+        await API.get('/api/auth/me');
+        frame.src = `/api/carnets/${encodeURIComponent(carnetId)}/documento/preview`;
+      } catch (err) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      document.getElementById('btnCerrar').onclick = () => window.close();
+      document.getElementById('btnImprimir').onclick = async () => {
+        try {
+          await API.post(`/api/carnets/${carnetId}/documento/registrar-impresion`, {});
+        } catch {
+          /* registrar impresión es best-effort */
+        }
+        const win = frame.contentWindow;
+        if (win) win.print();
+        else window.print();
+      };
+    })();
+  </script>
+</body>
+</html>

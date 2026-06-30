@@ -2,6 +2,252 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — Sprint 7 (2026-06-26)
+
+### Añadido — Dashboard ejecutivo
+
+**Backend:**
+- `dashboard.repository.js` — agregaciones SQL optimizadas por rol
+- `GET /api/dashboard` — payload unificado (resumen, gráficas, alertas, actividad)
+- Alcance: administrador (nacional), coordinador (regional), instructor (centro), aprendiz (personal)
+
+**Frontend:**
+- Dashboard ejecutivo con 11 KPIs, 6 gráficas Chart.js, alertas y actividad
+- Accesos rápidos por permisos
+- Auto-refresh cada 60 segundos
+- `dashboard.css` — estilos del panel
+
+**Verificación:** `sprint7-verify-dashboard.js`
+
+**Documentación:** `SPRINT_7_REPORT.md`
+
+---
+
+## [Unreleased] — Sprint 6 (2026-06-26)
+
+### Añadido — Validación QR y verificación pública
+
+**Backend:**
+- `qr.service.js` — tokens HMAC-SHA256, generación imagen QR
+- `validacion.service.js` — validación pública segura
+- `GET /api/validar/:token` (público, rate limited)
+- `GET /api/carnets/:id/qr`, `POST /api/carnets/:id/qr/regenerar`
+- `GET /api/dashboard/stats` — estadísticas reales
+- Repositorio `validacionesQr.repository.js`
+- Migración `validaciones_qr` (token_intentado, carnet_id nullable)
+
+**Frontend:**
+- `validar.html` — escáner QR móvil + validación manual
+- QR en detalle de carné, PDF y plantilla
+- Dashboard con stats y validaciones recientes
+
+**Dependencia:** `qrcode`
+
+**Verificación:** `sprint6-setup-db.js`, `sprint6-verify-qr.js`
+
+**Documentación:** `SPRINT_6_REPORT.md`
+
+---
+
+## [Unreleased] — Sprint 5 (2026-06-26)
+
+### Añadido — PDF, impresión y plantilla de carné
+
+**Backend:**
+- Motor de plantillas EJS (`backend/lib/carnetTemplate/`, `backend/templates/carnets/`)
+- Generación PDF con Puppeteer (`backend/lib/pdf/generator.js`)
+- Servicio `carnetPdf.service.js` — caché por hash, validaciones, historial
+- Endpoints `/api/carnets/:id/documento/*` (preview, pdf, historial, reimprimir, regenerar, registrar-impresion)
+- Tabla `carnet_documentos_historial`; columnas `pdf_generado_at`, `pdf_hash`, `template_id`, `reimpresiones_count`
+- Invalidación de caché PDF al mutar carné
+
+**Frontend:**
+- Botones Descargar PDF, Vista impresión, Reimprimir en detalle de carné
+- `carnets-imprimir.html` — vista previa e impresión desde navegador
+- `API.downloadBlob()` para descargas binarias
+
+**Dependencias:** `ejs`, `puppeteer`
+
+**Verificación:** `sprint5-setup-db.js`, `sprint5-verify-pdf.js`
+
+**Documentación:** `SPRINT_5_REPORT.md`
+
+---
+
+## [Unreleased] — Sprint 4 (2026-06-26)
+
+### Añadido — Sistema de generación de carnés
+
+**Backend:**
+- CRUD carnés con snapshot de usuario
+- Código único por regional/año/secuencia
+- Transiciones de estado validadas
+- Historial `historial_carnets`
+- Preview API antes de emisión
+- QR token placeholder (Sprint 5)
+- Permisos y alcance por rol
+
+**Frontend:**
+- `public/pages/carnets.html` — emisión, listado, detalle, acciones
+- Plantilla temporal HTML/CSS reemplazable
+
+**BD:**
+- `carnets.tipo_documento`, `carnets.dependencia_nombre`
+
+**Verificación:** `sprint4-setup-db.js`, `sprint4-verify-carnets.js`
+
+**Documentación:** `SPRINT_4_REPORT.md`
+
+---
+
+## [Unreleased] — Sprint 3 (2026-06-26)
+
+### Añadido — Gestión organizacional y control de accesos
+
+**Backend:**
+- CRUD completo: regionales, centros, dependencias, roles, permisos
+- Repositories y services por entidad (patrón Sprint 1/2)
+- Permisos: `regionales.*`, `centros.*`, `dependencias.*`, `permisos.gestionar`
+- `requireAuth` valida usuario con estado ACTIVO
+- Asignación de permisos a roles (`PUT /api/roles/:id/permisos`)
+- Auditoría con diff en actualizaciones
+- Columna `roles.activo` + migración 004
+
+**Frontend:**
+- `organizacion.html` — interfaz con pestañas
+- Gestión de permisos por rol (checkboxes)
+
+**Integración:**
+- Catálogos `/api/catalogos/*` con permisos ampliados
+- Usuarios: solo roles y entidades organizacionales activas
+
+**Verificación:**
+- `scripts/sprint3-setup-db.js`
+- `scripts/sprint3-verify-organizacion.js`
+
+**Documentación:** `SPRINT_3_REPORT.md`, ARCHITECTURE, PROJECT_CONTEXT, TASKS
+
+---
+
+## [Unreleased] — Sprint 2 (2026-06-26)
+
+### Añadido — Módulo de gestión de usuarios (producción)
+
+**Backend:**
+- Permisos granulares en rutas: `usuarios.ver`, `usuarios.crear`, `usuarios.editar`, `usuarios.desactivar`
+- Validaciones ampliadas: documento (5–50), teléfono, tipo documento, foto (MIME y 5 MB)
+- Filtros: `tipoUsuario`, `dependenciaId` en repository y controller
+- Auditoría con diff de cambios (`utils/diff.js`)
+- Alcance coordinador en crear/editar (`assertCoordinatorAssignment`)
+- Fix LIMIT/OFFSET en `users.repository.js` (compatibilidad mysql2)
+
+**Frontend:**
+- Filtros UI: regional, centro, dependencia, tipo de usuario
+- Validación cliente en formulario y foto
+- Toasts de éxito/error, spinners en acciones
+- Columna correo en tabla
+
+**Verificación:**
+- `scripts/sprint2-verify-usuarios.js` — CRUD, búsqueda, filtros, validaciones, permisos
+
+**Documentación:** `SPRINT_2_REPORT.md`, actualización TASKS, PROJECT_CONTEXT
+
+---
+
+## [Unreleased] — Sprint 1 (2026-06-26)
+
+### Refactor — Consolidación arquitectónica
+
+**Estructura:**
+- Nueva capa `backend/repositories/` (`users.repository.js`)
+- Nueva carpeta `backend/constants/` (enums, permisos, límites)
+- Utilidades compartidas: `request`, `asyncHandler`, `pagination`, `permissions`, `validators`, `errors`, `mappers`
+- Separación catálogos: `catalog.controller.js` + `catalog.routes.js`
+
+**Estandarización:**
+- `authController.js` → `auth.controller.js`
+- `authService.js` → `auth.service.js`
+- `auditoriaService.js` → `auditoria.service.js`
+- Assets carnés movidos a `public/js/` y `public/css/`
+
+**Seguridad:**
+- Filtro regional para coordinadores en listado/acceso usuarios
+- CSRF en mutaciones de usuarios y logout
+- Password recovery: bcrypt + columna `nombre_completo`
+- SQL LIMIT/OFFSET parametrizado
+
+**Documentación:** `SPRINT_1_REPORT.md`, actualización ARCHITECTURE, PROJECT_CONTEXT, TASKS
+
+---
+
+## [Unreleased] — Sprint 0 (2026-06-26)
+
+### Corregido — Estabilización y bloqueadores
+
+**Hallazgos validados y corregidos:**
+- `database/seed.sql` — INSERT coordinador: `rol_id` corregido a `rol-coord`
+- `package.json` — dependencias runtime completas; eliminado `sqlite3` sin uso
+- Autenticación CSRF — `GET /api/auth/csrf-token`, `api.js` y `login.js` integrados
+- `docker-compose.yml` — `MYSQL_ROOT_PASSWORD` alineado con `.env` (`root`)
+- `public/index.html`, `public/pages/dashboard.html` — textos actualizados
+
+**Verificación:**
+- `npm install` y `npm run dev` operativos
+- `schema.sql` + `seed.sql` ejecutan sin errores
+- Login admin y coordinador verificado (`scripts/sprint0-verify-auth.js`)
+
+**Scripts de verificación añadidos:**
+- `scripts/sprint0-verify-db.js`
+- `scripts/sprint0-verify-auth.js`
+
+**Documentación:** `SPRINT_0_REPORT.md`, actualización de PROJECT_CONTEXT, ROADMAP, TASKS, ARCHITECTURE
+
+**Pendiente (no Sprint 0):** README Next.js desactualizado, migraciones 002/003, password recovery SHA256, filtro regional coordinadores
+
+---
+
+## [Unreleased] — Auditoría 2026-06-26
+
+### Documentación — Auditoría técnica completa
+
+**Alcance:** Revisión estática de todo el repositorio sin modificar código de aplicación.
+
+**Archivos creados:**
+- `AUDITORIA_PROYECTO.md` — Informe completo de auditoría
+- `PROJECT_CONTEXT.md` — Contexto para continuidad del proyecto
+- `TASKS.md` — Checklist de tareas con estado real
+
+**Archivos actualizados:**
+- `ARCHITECTURE.md` — Reescrito para stack Express activo (antes describía solo Next.js)
+- `ROADMAP.md` — Fases actualizadas con estado real y Fase 0.5 (bloqueadores)
+
+### Hallazgos críticos (sin corregir — pendiente aprobación)
+
+**Bloqueadores:**
+- CSRF implementado en backend pero frontend (`api.js`, `login.js`) no envía token → login falla con 403
+- `package.json` incompleto: faltan mysql2, bcryptjs, express-session, multer, dotenv, cors
+- `database/seed.sql` líneas 88-99: INSERT coordinador con `rol_id='COORDINADOR'` en vez de `'rol-coord'`
+
+**Bugs detectados:**
+- `passwordRecovery.routes.js` usa SHA256 para reset en vez de bcrypt
+- `passwordRecovery.routes.js` consulta columnas `nombres`/`apellidos` que no existen en `usuarios`
+- `public/carnets.html` apunta a `/api/carnets` no montada en servidor Express activo
+- Migraciones `002_security_audit.sql` y `003_password_recovery_2fa.sql` no integradas en `schema.sql`
+
+**Deuda técnica:**
+- README.md y PROYECTO.md describen Next.js como stack activo (desactualizado)
+- `dashboard.html` e `index.html` con textos obsoletos ("próximamente", "continuar con auth")
+- Tres stacks superpuestos: Express activo, Next.js legacy (`src/`), mock carnets (`index.js`)
+- Tests (`tests/carnets.test.js`) prueban servicio mock, no backend Express
+- Archivos basura: `foo.txt`, `newfile.txt`, `test.txt`, `cookies.txt`
+
+**Estado real del proyecto:**
+- Stack activo Express: ~28% de avance global
+- Módulos completos en legacy Next.js no ejecutable con package.json actual
+- MySQL no disponible durante auditoría — verificación runtime pendiente
+
+---
+
 ## [1.2.0] — 2026-06-17
 
 ### Mejorado — Módulo QR y Validación Pública

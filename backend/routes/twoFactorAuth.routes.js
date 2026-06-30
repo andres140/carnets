@@ -6,13 +6,10 @@
 const express = require('express');
 const twoFactorAuthService = require('../services/twoFactorAuthService');
 const { requireAuth } = require('../middleware/auth');
-const auditoriaService = require('../services/auditoriaService');
+const auditoriaService = require('../services/auditoria.service');
+const { getClientIp } = require('../utils/request');
 
 const router = express.Router();
-
-function getClientIp(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
-}
 
 /**
  * POST /api/auth/2fa/setup

@@ -5,7 +5,7 @@
 
 const crypto = require('crypto');
 const db = require('../config/database');
-const auditoriaService = require('./auditoriaService');
+const auditoriaService = require('./auditoria.service');
 
 /**
  * Generar token de reset de contraseña
