@@ -1,0 +1,40 @@
+.app-body {
+  background: var(--color-bg);
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-main-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--duration-base) var(--ease-in-out);
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--space-6) 0;
+  animation: fadeInUp var(--duration-slow) var(--ease-out);
+}
+
+.app-main-inner {
+  max-width: var(--content-max-width);
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+@media (max-width: 991.98px) {
+  .app-main-wrapper {
+    margin-left: 0;
+  }
+
+  .app-main-inner {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+}

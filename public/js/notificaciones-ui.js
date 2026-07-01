@@ -3,7 +3,7 @@
  */
 const NOTIF_NAV_HTML = `
   <div class="dropdown notif-dropdown">
-    <button class="btn btn-link text-white position-relative p-1" type="button" data-bs-toggle="dropdown" aria-label="Notificaciones">
+    <button class="btn btn-link notif-trigger position-relative p-0" type="button" data-bs-toggle="dropdown" aria-label="Notificaciones">
       <i class="bi bi-bell fs-5"></i>
       <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge">0</span>
     </button>

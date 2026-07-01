@@ -1,0 +1,108 @@
+.login-page {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(57, 169, 0, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 90%, rgba(31, 107, 42, 0.14), transparent 50%),
+    linear-gradient(160deg, #F7F8FA 0%, #EEF5EB 45%, #F7F8FA 100%);
+}
+
+.login-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(57, 169, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 169, 0, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+.login-card {
+  animation: fadeInUp var(--duration-slow) var(--ease-out);
+  backdrop-filter: blur(8px);
+}
+
+.login-logo {
+  font-size: 1.1rem;
+  min-width: 72px;
+}
+
+.login-page .form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+
+.login-page .btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.login-footer-text {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.auth-brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.auth-brand-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+}
+
+.auth-brand-text {
+  display: inline-block;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.1em;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+.auth-body {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.auth-body .auth-card {
+  animation: fadeInUp var(--duration-slow) var(--ease-out);
+}
+
+.status-dot--ok {
+  background: var(--color-success);
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}

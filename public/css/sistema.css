@@ -1,26 +1,2 @@
-/* Configuración y monitoreo del sistema */
-.sistema-hero {
-  background: linear-gradient(135deg, rgba(0, 102, 204, 0.08), rgba(57, 169, 0, 0.06));
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-}
-
-.status-pill-ok { background: #d1e7dd; color: #0f5132; }
-.status-pill-warn { background: #fff3cd; color: #664d03; }
-.status-pill-err { background: #f8d7da; color: #842029; }
-
-.monitor-card .metric {
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-.logo-preview {
-  max-height: 64px;
-  max-width: 200px;
-  object-fit: contain;
-}
-
-.notif-item.unread {
-  border-left: 3px solid var(--sena-green);
-  background: rgba(57, 169, 0, 0.05);
-}
+/** @deprecated — usar /css/app.css */
+@import url('./app.css');

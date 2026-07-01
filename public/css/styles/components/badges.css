@@ -1,0 +1,67 @@
+.badge {
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  padding: 0.35em 0.7em;
+  font-size: var(--font-size-xs);
+}
+
+.bg-primary,
+.badge.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.bg-primary-subtle {
+  background-color: var(--color-primary-light) !important;
+}
+
+.text-primary.badge,
+.badge.text-primary {
+  color: var(--color-primary-dark) !important;
+}
+
+.badge-estado-activo,
+.estado-badge.estado-ACTIVO {
+  background: rgba(40, 167, 69, 0.15) !important;
+  color: #1e7e34 !important;
+}
+
+.badge-estado-inactivo {
+  background: rgba(108, 117, 125, 0.15);
+  color: #495057;
+}
+
+.badge-estado-vencido,
+.estado-badge.estado-VENCIDO {
+  background: rgba(255, 193, 7, 0.2) !important;
+  color: #997404 !important;
+}
+
+.badge-estado-suspendido,
+.estado-badge.estado-SUSPENDIDO {
+  background: rgba(13, 202, 240, 0.15) !important;
+  color: #0a6678 !important;
+}
+
+.badge-estado-revocado,
+.estado-badge.estado-REVOCADO {
+  background: rgba(220, 53, 69, 0.15) !important;
+  color: #b02a37 !important;
+}
+
+.estado-badge.estado-invalido {
+  background: rgba(108, 117, 125, 0.2) !important;
+  color: #495057 !important;
+}
+
+.estado-badge.fs-6 {
+  padding: 0.5em 0.85em;
+  font-size: var(--font-size-sm) !important;
+}
+
+.scope-badge,
+.scope-pill {
+  font-size: var(--font-size-xs);
+  background: var(--color-primary-light) !important;
+  color: var(--color-primary-dark) !important;
+  border: 1px solid rgba(57, 169, 0, 0.2);
+}

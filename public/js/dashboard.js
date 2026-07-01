@@ -3,7 +3,7 @@
  */
 (function () {
   const REFRESH_MS = 60000;
-  const SENA_COLORS = ['#0066cc', '#39a900', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1', '#fd7e14', '#20c997'];
+  const SENA_COLORS = ['#39A900', '#1F6B2A', '#FFC107', '#DC3545', '#0DCAF0', '#28A745', '#FD7E14', '#20C997'];
 
   const state = { charts: {}, user: null, timer: null };
 
@@ -105,7 +105,7 @@
       'chartCarnetsMes',
       'line',
       graficas.carnetsPorMes.labels,
-      [{ label: 'Carnés', data: graficas.carnetsPorMes.values, borderColor: '#0066cc', backgroundColor: 'rgba(0,102,204,0.1)', fill: true, tension: 0.3 }]
+      [{ label: 'Carnés', data: graficas.carnetsPorMes.values, borderColor: '#39A900', backgroundColor: 'rgba(57,169,0,0.12)', fill: true, tension: 0.3 }]
     );
 
     upsertChart(
@@ -127,7 +127,7 @@
       'chartUsuariosRegional',
       'bar',
       graficas.usuariosPorRegional.labels,
-      [{ label: 'Usuarios', data: graficas.usuariosPorRegional.values, backgroundColor: '#0066cc' }],
+      [{ label: 'Usuarios', data: graficas.usuariosPorRegional.values, backgroundColor: '#1F6B2A' }],
       { indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
     );
 

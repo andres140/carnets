@@ -2,7 +2,7 @@
  * Centro de reportes — consultas, gráficas y exportación.
  */
 (function () {
-  const COLORS = ['#0066cc', '#39a900', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1'];
+  const COLORS = ['#39A900', '#1F6B2A', '#FFC107', '#DC3545', '#0DCAF0', '#28A745'];
   const state = { user: null, charts: {}, filters: { usuarios: {}, carnets: {}, validaciones: {}, busqueda: {} }, catalogs: {} };
 
   function toast(msg, type = 'info') {

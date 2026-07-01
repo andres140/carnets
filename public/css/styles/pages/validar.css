@@ -1,0 +1,79 @@
+.validar-body {
+  background: var(--color-bg);
+  min-height: 100vh;
+}
+
+.validar-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
+}
+
+.validar-header-inner {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.validar-main {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.qr-reader-box {
+  width: 100%;
+  min-height: 280px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #1a1a1a;
+  border: 2px solid var(--color-border);
+}
+
+.validar-foto {
+  width: 96px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.field-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.15rem;
+}
+
+.field-value {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0;
+  color: var(--color-text);
+}
+
+#resultadoPlaceholder {
+  animation: fadeIn var(--duration-slow) var(--ease-out);
+}
+
+#resultadoCard {
+  animation: fadeInUp var(--duration-slow) var(--ease-out);
+}
+
+#qrReader video {
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 768px) {
+  .validar-header-inner,
+  .validar-main {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+}

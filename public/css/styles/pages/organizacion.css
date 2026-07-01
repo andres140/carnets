@@ -1,0 +1,5 @@
+/* Organización — estilos mínimos; árbol y tabs usan componentes globales */
+
+.org-panel {
+  border-radius: var(--radius-lg);
+}

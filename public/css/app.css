@@ -1,0 +1,34 @@
+/**
+ * SENA Carnés — Hoja de estilos principal
+ * Importa el sistema de diseño completo
+ */
+
+@import url('./styles/variables.css');
+@import url('./styles/base/reset.css');
+@import url('./styles/base/typography.css');
+@import url('./styles/layout/shell.css');
+@import url('./styles/layout/sidebar.css');
+@import url('./styles/layout/header.css');
+@import url('./styles/layout/footer.css');
+@import url('./styles/components/buttons.css');
+@import url('./styles/components/forms.css');
+@import url('./styles/components/cards.css');
+@import url('./styles/components/tables.css');
+@import url('./styles/components/modals.css');
+@import url('./styles/components/alerts.css');
+@import url('./styles/components/badges.css');
+@import url('./styles/components/tabs.css');
+@import url('./styles/components/dropdowns.css');
+@import url('./styles/components/breadcrumbs.css');
+@import url('./styles/components/skeleton.css');
+@import url('./styles/utilities/animations.css');
+@import url('./styles/utilities/helpers.css');
+@import url('./styles/pages/login.css');
+@import url('./styles/pages/dashboard.css');
+@import url('./styles/pages/usuarios.css');
+@import url('./styles/pages/carnets.css');
+@import url('./styles/pages/reportes.css');
+@import url('./styles/pages/validar.css');
+@import url('./styles/pages/auditoria.css');
+@import url('./styles/pages/sistema.css');
+@import url('./styles/pages/organizacion.css');

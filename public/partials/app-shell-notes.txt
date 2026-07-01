@@ -1,0 +1,2 @@
+<!-- Fragmento de referencia — copiar en páginas autenticadas -->
+<!-- activePage: dashboard | usuarios | organizacion | carnets | reportes | auditoria | sistema | validar -->

@@ -1,0 +1,12 @@
+.page-reportes .reportes-hero {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1px solid rgba(57, 169, 0, 0.12);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+}
+
+@media (max-width: 768px) {
+  .page-reportes .report-kpi .kpi-value {
+    font-size: 1.2rem;
+  }
+}

@@ -1,0 +1,20 @@
+.page-dashboard .dashboard-hero {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border: 1px solid rgba(57, 169, 0, 0.15);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+}
+
+.page-dashboard .dashboard-hero .scope-badge {
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 576px) {
+  .page-dashboard .stat-card .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .page-dashboard .chart-wrap {
+    height: 200px;
+  }
+}

@@ -1,0 +1,6 @@
+.page-sistema .sistema-hero {
+  background: linear-gradient(135deg, var(--color-primary-light), transparent);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid rgba(57, 169, 0, 0.1);
+}

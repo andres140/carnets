@@ -1,0 +1,57 @@
+.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.navbar-dark.bg-primary {
+  background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary)) !important;
+}
+
+.shadow-sm {
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.border-0.card {
+  border: 1px solid var(--color-border) !important;
+}
+
+.text-success {
+  color: var(--color-success) !important;
+}
+
+.text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+}
+
+.user-avatar-lg {
+  width: 80px;
+  height: 80px;
+}
+
+.stat-mini {
+  border-left: 4px solid var(--color-primary);
+  padding-left: var(--space-3);
+}
+
+.activity-item {
+  border-left: 3px solid var(--color-primary);
+  padding-left: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.activity-item .time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.refresh-indicator {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
