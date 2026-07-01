@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes — SENA Carnés</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/sena.css" rel="stylesheet">
+  <link href="/css/reportes.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="/dashboard.html">
+        <i class="bi bi-bar-chart-line me-2"></i>SENA Carnés
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/dashboard.html">Dashboard</a></li>
+          <li class="nav-item nav-usuarios d-none"><a class="nav-link" href="/usuarios.html">Usuarios</a></li>
+          <li class="nav-item nav-organizacion d-none"><a class="nav-link" href="/organizacion.html">Organización</a></li>
+          <li class="nav-item nav-carnets d-none"><a class="nav-link" href="/carnets.html">Carnés</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/reportes.html">Reportes</a></li>
+          <li class="nav-item"><a class="nav-link" href="/validar.html">Validar QR</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-3">
+          <div id="notifNavSlot"></div>
+          <span class="text-white-50 small d-none d-md-inline" id="userName"></span>
+          <button class="btn btn-outline-light btn-sm" id="btnLogout"><i class="bi bi-box-arrow-right"></i> Salir</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container-fluid py-4">
+    <div class="reportes-hero mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <h1 class="h3 fw-bold mb-1">Centro de reportes</h1>
+        <p class="text-muted mb-0 small">Consultas, estadísticas y exportación institucional en tiempo real</p>
+      </div>
+      <span class="badge bg-primary-subtle text-primary scope-pill" id="scopeLabel">—</span>
+    </div>
+
+    <ul class="nav nav-tabs nav-reportes-tabs mb-4" id="reportTabs" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabResumen" type="button">Resumen</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabUsuarios" type="button">Usuarios</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCarnets" type="button">Carnés</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabValidaciones" type="button">Validaciones QR</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabBusqueda" type="button">Búsqueda avanzada</button></li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Resumen -->
+      <div class="tab-pane fade show active" id="tabResumen">
+        <div class="row g-3 mb-4" id="kpiCards"></div>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header bg-white fw-semibold">Carnés por estado</div>
+              <div class="card-body"><div class="chart-box"><canvas id="chartCarnetsEstado"></canvas></div></div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header bg-white fw-semibold">Usuarios por regional</div>
+              <div class="card-body"><div class="chart-box"><canvas id="chartUsuariosRegional"></canvas></div></div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header bg-white fw-semibold">Emisiones por período</div>
+              <div class="card-body"><div class="chart-box"><canvas id="chartEmisiones"></canvas></div></div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header bg-white fw-semibold">Validaciones QR (14 días)</div>
+              <div class="card-body"><div class="chart-box"><canvas id="chartValidaciones"></canvas></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usuarios -->
+      <div class="tab-pane fade" id="tabUsuarios">
+        <div class="card border-0 shadow-sm filters-panel mb-3">
+          <div class="card-body">
+            <form id="formFiltrosUsuarios" class="row g-2 align-items-end">
+              <div class="col-md-2"><label class="form-label small">Nombre</label><input type="text" class="form-control form-control-sm" name="nombre"></div>
+              <div class="col-md-2"><label class="form-label small">Documento</label><input type="text" class="form-control form-control-sm" name="documento"></div>
+              <div class="col-md-2"><label class="form-label small">Correo</label><input type="text" class="form-control form-control-sm" name="email"></div>
+              <div class="col-md-2"><label class="form-label small">Tipo</label><select class="form-select form-select-sm" name="tipoUsuario" id="selTipoUsuario"></select></div>
+              <div class="col-md-2"><label class="form-label small">Estado</label><select class="form-select form-select-sm" name="estado"><option value="">Todos</option><option value="ACTIVO">Activo</option><option value="INACTIVO">Inactivo</option><option value="SUSPENDIDO">Suspendido</option></select></div>
+              <div class="col-md-2"><label class="form-label small">Regional</label><select class="form-select form-select-sm" name="regionalId" id="selRegionalUsuarios"></select></div>
+              <div class="col-md-2"><label class="form-label small">Centro</label><select class="form-select form-select-sm" name="centroId" id="selCentroUsuarios"></select></div>
+              <div class="col-md-2"><label class="form-label small">Registro desde</label><input type="date" class="form-control form-control-sm" name="fechaRegistroDesde"></div>
+              <div class="col-md-2"><label class="form-label small">Registro hasta</label><input type="date" class="form-control form-control-sm" name="fechaRegistroHasta"></div>
+              <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Consultar</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-reset="formFiltrosUsuarios">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+          <div id="statsUsuarios" class="small text-muted"></div>
+          <div class="btn-group export-group btn-group-sm">
+            <button class="btn btn-outline-success btn-export" data-tipo="usuarios" data-format="csv">CSV</button>
+            <button class="btn btn-outline-success btn-export" data-tipo="usuarios" data-format="xlsx">Excel</button>
+            <button class="btn btn-outline-danger btn-export" data-tipo="usuarios" data-format="pdf">PDF</button>
+          </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0 report-table-wrap">
+            <table class="table table-hover report-table mb-0">
+              <thead><tr><th>Documento</th><th>Nombre</th><th>Correo</th><th>Tipo</th><th>Estado</th><th>Regional</th><th>Registro</th></tr></thead>
+              <tbody id="tbodyUsuarios"></tbody>
+            </table>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center" id="pagUsuarios"></div>
+        </div>
+      </div>
+
+      <!-- Carnés -->
+      <div class="tab-pane fade" id="tabCarnets">
+        <div class="card border-0 shadow-sm filters-panel mb-3">
+          <div class="card-body">
+            <form id="formFiltrosCarnets" class="row g-2 align-items-end">
+              <div class="col-md-2"><label class="form-label small">Estado</label><select class="form-select form-select-sm" name="estado"><option value="">Todos</option><option value="ACTIVO">Activo</option><option value="VENCIDO">Vencido</option><option value="SUSPENDIDO">Suspendido</option><option value="REVOCADO">Revocado</option></select></div>
+              <div class="col-md-2"><label class="form-label small">Documento</label><input type="text" class="form-control form-control-sm" name="documento"></div>
+              <div class="col-md-2"><label class="form-label small">Nombre</label><input type="text" class="form-control form-control-sm" name="nombre"></div>
+              <div class="col-md-2"><label class="form-label small">Regional</label><select class="form-select form-select-sm" name="regionalId" id="selRegionalCarnets"></select></div>
+              <div class="col-md-2"><label class="form-label small">Centro</label><select class="form-select form-select-sm" name="centroId" id="selCentroCarnets"></select></div>
+              <div class="col-md-2"><label class="form-label small">Expedición desde</label><input type="date" class="form-control form-control-sm" name="fechaExpedicionDesde"></div>
+              <div class="col-md-2"><label class="form-label small">Expedición hasta</label><input type="date" class="form-control form-control-sm" name="fechaExpedicionHasta"></div>
+              <div class="col-md-2"><label class="form-label small">Vence desde</label><input type="date" class="form-control form-control-sm" name="fechaVencimientoDesde"></div>
+              <div class="col-md-2"><label class="form-label small">Vence hasta</label><input type="date" class="form-control form-control-sm" name="fechaVencimientoHasta"></div>
+              <div class="col-md-2 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" name="proximosVencer" value="1" id="chkProximos"><label class="form-check-label small" for="chkProximos">Próximos a vencer</label></div></div>
+              <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Consultar</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-reset="formFiltrosCarnets">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+          <div id="statsCarnets" class="small text-muted"></div>
+          <div class="btn-group export-group btn-group-sm">
+            <button class="btn btn-outline-success btn-export" data-tipo="carnets" data-format="csv">CSV</button>
+            <button class="btn btn-outline-success btn-export" data-tipo="carnets" data-format="xlsx">Excel</button>
+            <button class="btn btn-outline-danger btn-export" data-tipo="carnets" data-format="pdf">PDF</button>
+          </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0 report-table-wrap">
+            <table class="table table-hover report-table mb-0">
+              <thead><tr><th>Código</th><th>Documento</th><th>Nombre</th><th>Estado</th><th>Expedición</th><th>Vencimiento</th><th>Regional</th></tr></thead>
+              <tbody id="tbodyCarnets"></tbody>
+            </table>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center" id="pagCarnets"></div>
+        </div>
+      </div>
+
+      <!-- Validaciones -->
+      <div class="tab-pane fade" id="tabValidaciones">
+        <div class="card border-0 shadow-sm filters-panel mb-3">
+          <div class="card-body">
+            <form id="formFiltrosValidaciones" class="row g-2 align-items-end">
+              <div class="col-md-2"><label class="form-label small">Desde</label><input type="date" class="form-control form-control-sm" name="fechaDesde"></div>
+              <div class="col-md-2"><label class="form-label small">Hasta</label><input type="date" class="form-control form-control-sm" name="fechaHasta"></div>
+              <div class="col-md-2"><label class="form-label small">Resultado</label><select class="form-select form-select-sm" name="resultado"><option value="">Todos</option><option value="EXITOSAS">Exitosas</option><option value="FALLIDAS">Fallidas</option><option value="VALIDO">Válido</option><option value="VENCIDO">Vencido</option><option value="SUSPENDIDO">Suspendido</option><option value="REVOCADO">Revocado</option></select></div>
+              <div class="col-md-2"><label class="form-label small">Regional</label><select class="form-select form-select-sm" name="regionalId" id="selRegionalValidaciones"></select></div>
+              <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Consultar</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-reset="formFiltrosValidaciones">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4"><div class="card border-0 shadow-sm report-kpi"><div class="card-body"><div class="text-muted small">Exitosas</div><div class="kpi-value text-success" id="valExitosas">0</div></div></div></div>
+          <div class="col-md-4"><div class="card border-0 shadow-sm report-kpi"><div class="card-body"><div class="text-muted small">Fallidas</div><div class="kpi-value text-danger" id="valFallidas">0</div></div></div></div>
+          <div class="col-md-4"><div class="card border-0 shadow-sm report-kpi"><div class="card-body"><div class="text-muted small">Total filtrado</div><div class="kpi-value text-primary" id="valTotal">0</div></div></div></div>
+        </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+          <div class="small text-muted">Carnés más consultados y actividad por hora en el panel lateral al consultar.</div>
+          <div class="btn-group export-group btn-group-sm">
+            <button class="btn btn-outline-success btn-export" data-tipo="validaciones" data-format="csv">CSV</button>
+            <button class="btn btn-outline-success btn-export" data-tipo="validaciones" data-format="xlsx">Excel</button>
+            <button class="btn btn-outline-danger btn-export" data-tipo="validaciones" data-format="pdf">PDF</button>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-0 report-table-wrap">
+                <table class="table table-hover report-table mb-0">
+                  <thead><tr><th>Fecha</th><th>Resultado</th><th>Código</th><th>Nombre</th><th>Regional</th></tr></thead>
+                  <tbody id="tbodyValidaciones"></tbody>
+                </table>
+              </div>
+              <div class="card-footer" id="pagValidaciones"></div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-3">
+              <div class="card-header bg-white fw-semibold small">Más consultados</div>
+              <ul class="list-group list-group-flush" id="listMasConsultados"></ul>
+            </div>
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white fw-semibold small">Actividad por hora</div>
+              <div class="card-body"><div class="chart-box" style="height:200px"><canvas id="chartHorasValidacion"></canvas></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Búsqueda avanzada -->
+      <div class="tab-pane fade" id="tabBusqueda">
+        <div class="card border-0 shadow-sm filters-panel mb-3">
+          <div class="card-body">
+            <form id="formBusqueda" class="row g-2 align-items-end">
+              <div class="col-md-2"><label class="form-label small">Buscar en</label><select class="form-select form-select-sm" name="tipo"><option value="carnets">Carnés</option><option value="usuarios">Usuarios</option><option value="validaciones">Validaciones</option></select></div>
+              <div class="col-md-2"><label class="form-label small">Nombre</label><input type="text" class="form-control form-control-sm" name="nombre"></div>
+              <div class="col-md-2"><label class="form-label small">Documento</label><input type="text" class="form-control form-control-sm" name="documento"></div>
+              <div class="col-md-2"><label class="form-label small">Correo</label><input type="text" class="form-control form-control-sm" name="email"></div>
+              <div class="col-md-2"><label class="form-label small">Estado</label><input type="text" class="form-control form-control-sm" name="estado" placeholder="ACTIVO, VENCIDO…"></div>
+              <div class="col-md-2"><label class="form-label small">Regional</label><select class="form-select form-select-sm" name="regionalId" id="selRegionalBusqueda"></select></div>
+              <div class="col-md-2"><label class="form-label small">Centro</label><select class="form-select form-select-sm" name="centroId" id="selCentroBusqueda"></select></div>
+              <div class="col-md-2"><label class="form-label small">Expedición desde</label><input type="date" class="form-control form-control-sm" name="fechaExpedicionDesde"></div>
+              <div class="col-md-2"><label class="form-label small">Vencimiento hasta</label><input type="date" class="form-control form-control-sm" name="fechaVencimientoHasta"></div>
+              <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel"></i> Buscar</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-reset="formBusqueda">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white d-flex justify-content-between">
+            <span class="fw-semibold">Resultados</span>
+            <span class="small text-muted" id="busquedaMeta"></span>
+          </div>
+          <div class="card-body p-0 report-table-wrap">
+            <table class="table table-hover report-table mb-0">
+              <thead id="theadBusqueda"></thead>
+              <tbody id="tbodyBusqueda"></tbody>
+            </table>
+          </div>
+          <div class="card-footer" id="pagBusqueda"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/notificaciones-ui.js"></script>
+  <script src="/js/reportes.js"></script>
+</body>
+</html>

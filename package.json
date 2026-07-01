@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "node backend/server.js",
     "start": "node backend/server.js",
+    "setup:db": "node scripts/setup-db.js",
+    "verify:rc1": "node scripts/sprint10-verify-rc1.js",
     "test": "node --test tests/carnets.test.js"
   },
   "dependencies": {
@@ -20,6 +22,7 @@
     "mysql2": "^3.11.0",
     "nodemailer": "^6.9.14",
     "puppeteer": "^23.11.1",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "xlsx": "^0.18.5"
   }
 }

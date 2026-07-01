@@ -61,3 +61,25 @@ body {
 .navbar-brand {
   font-size: 1.1rem;
 }
+
+.notif-dropdown .btn-link {
+  text-decoration: none;
+}
+
+.notif-dropdown .btn-link:hover {
+  opacity: 0.85;
+}
+
+.notif-dropdown-menu {
+  width: min(320px, 90vw);
+  padding: 0;
+}
+
+.notif-dropdown-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.notif-dropdown-list .notif-item {
+  cursor: pointer;
+}

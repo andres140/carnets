@@ -9,6 +9,7 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const { securityHeadersMiddleware } = require('./middleware/securityHeaders');
 const { apiRateLimit } = require('./middleware/rateLimit');
 const { csrfTokenMiddleware } = require('./middleware/csrf');
+const { sessionGuard } = require('./middleware/sessionGuard');
 
 const app = express();
 const publicDir = path.join(__dirname, '../public');
@@ -34,6 +35,9 @@ app.use(createSessionMiddleware());
 
 // CSRF token middleware
 app.use(csrfTokenMiddleware);
+
+// Validar sesiones revocadas y registrar actividad
+app.use(sessionGuard);
 
 // Archivos estáticos (css, js, uploads)
 app.use(express.static(publicDir));

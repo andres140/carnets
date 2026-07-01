@@ -17,23 +17,21 @@ async function logSecurityEvent(event) {
   } = event;
 
   try {
+    const { randomUUID } = require('crypto');
     const sql = `
-      INSERT INTO auditoria_seguridad (tipo, usuario_id, ip, detalles, fecha_creacion)
-      VALUES (?, ?, ?, ?, NOW())
+      INSERT INTO auditoria_seguridad (id, tipo, usuario_id, ip, detalles, fecha_creacion)
+      VALUES (?, ?, ?, ?, ?, NOW())
     `;
 
-    return new Promise((resolve, reject) => {
-      db.query(sql, [tipo, usuarioId || null, ip, JSON.stringify(detalles || {})], (err, result) => {
-        if (err) {
-          console.error('Error registrando evento de seguridad:', err);
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
+    await db.query(sql, [
+      randomUUID(),
+      tipo,
+      usuarioId || null,
+      ip,
+      JSON.stringify(detalles || {}),
+    ]);
   } catch (err) {
-    console.error('Error en logSecurityEvent:', err);
+    console.error('Error registrando evento de seguridad:', err);
     throw err;
   }
 }
@@ -65,15 +63,7 @@ async function getSecurityEvents(filters = {}) {
 
     sql += ' ORDER BY fecha_creacion DESC LIMIT 1000';
 
-    return new Promise((resolve, reject) => {
-      db.query(sql, params, (err, results) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(results);
-        }
-      });
-    });
+    return db.query(sql, params);
   } catch (err) {
     console.error('Error en getSecurityEvents:', err);
     throw err;
@@ -90,16 +80,8 @@ async function detectSuspiciousActivity(ip, tipo, timeWindowMinutes = 15) {
       WHERE ip = ? AND tipo = ? AND fecha_creacion >= DATE_SUB(NOW(), INTERVAL ? MINUTE)
     `;
 
-    return new Promise((resolve, reject) => {
-      db.query(sql, [ip, tipo, timeWindowMinutes], (err, results) => {
-        if (err) {
-          reject(err);
-        } else {
-          const count = results[0]?.count || 0;
-          resolve(count);
-        }
-      });
-    });
+    const results = await db.query(sql, [ip, tipo, timeWindowMinutes]);
+    return results[0]?.count || 0;
   } catch (err) {
     console.error('Error en detectSuspiciousActivity:', err);
     throw err;

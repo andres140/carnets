@@ -196,6 +196,9 @@
     const can = (p) => perms.includes(p);
     if (can('usuarios.ver')) document.querySelector('.nav-usuarios')?.classList.remove('d-none');
     if (can('carnets.ver') || can('carnets.generar')) document.querySelector('.nav-carnets')?.classList.remove('d-none');
+    if (can('reportes.ver')) document.querySelector('.nav-reportes')?.classList.remove('d-none');
+    if (can('auditoria.ver')) document.querySelector('.nav-auditoria')?.classList.remove('d-none');
+    if (can('config.gestionar')) document.querySelector('.nav-sistema')?.classList.remove('d-none');
     if (can('regionales.gestionar') || can('roles.gestionar')) document.querySelector('.nav-organizacion')?.classList.remove('d-none');
   }
 
@@ -227,6 +230,8 @@
       state.user = user;
       document.getElementById('userName').textContent = user.nombreCompleto;
       applyNavPermissions(user);
+      NotificacionesUI.mountNavbar();
+      NotificacionesUI.refresh();
       await loadDashboard();
 
       state.timer = setInterval(async () => {

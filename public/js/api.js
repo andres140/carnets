@@ -109,4 +109,35 @@ const API = {
     URL.revokeObjectURL(objectUrl);
     return blob;
   },
+
+  async downloadExport(url, filename) {
+    const res = await fetch(url, {
+      credentials: 'include',
+      headers: { Accept: '*/*' },
+    });
+
+    if (!res.ok) {
+      let message = `Error ${res.status}`;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        message = data.error || message;
+      }
+      throw new Error(message);
+    }
+
+    const disposition = res.headers.get('content-disposition') || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const name = match?.[1] || filename || 'reporte.csv';
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(objectUrl);
+    return blob;
+  },
 };

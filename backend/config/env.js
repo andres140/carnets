@@ -48,4 +48,18 @@ const env = {
   },
 };
 
+if (env.nodeEnv === 'production') {
+  const required = [
+    ['SESSION_SECRET', process.env.SESSION_SECRET],
+    ['QR_SIGNING_KEY', process.env.QR_SIGNING_KEY],
+  ];
+  for (const [name, value] of required) {
+    if (!value || value.length < 32) {
+      throw new Error(
+        `${name} debe definirse en producción con al menos 32 caracteres aleatorios.`
+      );
+    }
+  }
+}
+
 module.exports = env;

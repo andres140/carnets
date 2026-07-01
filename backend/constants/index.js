@@ -83,6 +83,47 @@ const DOCUMENTO_CARNET_ACCION = ['GENERAR', 'DESCARGAR', 'IMPRIMIR', 'REIMPRIMIR
 
 const EXPORT_FORMATS = ['pdf', 'png', 'jpg'];
 
+const REPORT = {
+  MAX_PAGE_LIMIT: 100,
+  EXPORT_MAX_ROWS: 10000,
+  PROXIMOS_VENCER_DIAS: 30,
+};
+
+const AUDITORIA_RESULTADO = ['EXITO', 'ERROR'];
+
+const MODULOS = {
+  AUTH: 'Autenticación',
+  USUARIOS: 'Usuarios',
+  CARNETS: 'Carnés',
+  ORGANIZACION: 'Organización',
+  VALIDACION: 'Validación QR',
+  REPORTES: 'Reportes',
+  CONFIG: 'Configuración',
+  SISTEMA: 'Sistema',
+  SEGURIDAD: 'Seguridad',
+};
+
+const NOTIFICACION_TIPOS = {
+  CARNET_VENCER: 'carnet_proximo_vencer',
+  SIN_FOTO: 'usuario_sin_foto',
+  ERROR_CRITICO: 'error_critico',
+  EXPORTACION: 'exportacion_completada',
+  ACCESO_SOSPECHOSO: 'acceso_sospechoso',
+  CONFIG_CAMBIO: 'config_cambio',
+  SISTEMA: 'sistema',
+};
+
+const CONFIG_KEYS = {
+  INSTITUCION_NOMBRE: 'institucion_nombre',
+  LOGO_URL: 'logo_url',
+  SESSION_MAX_AGE_MS: 'session_max_age_ms',
+  CARNET_VIGENCIA_ANOS: 'carnet_vigencia_anos',
+  CARNET_CODIGO_FORMATO: 'carnet_codigo_formato',
+  UPLOAD_MAX_MB: 'upload_max_mb',
+  IDIOMA: 'idioma',
+  TIMEZONE: 'timezone',
+};
+
 module.exports = {
   ESTADOS_USUARIO,
   ESTADOS_CARNET,
@@ -99,4 +140,9 @@ module.exports = {
   CARNET,
   DOCUMENTO_CARNET_ACCION,
   EXPORT_FORMATS,
+  REPORT,
+  AUDITORIA_RESULTADO,
+  MODULOS,
+  NOTIFICACION_TIPOS,
+  CONFIG_KEYS,
 };

@@ -17,7 +17,9 @@ const carnets = [
 
 const usuarios = {
   'USR-001': { activo: true },
-  'USR-002': { activo: false }
+  'USR-002': { activo: false },
+  'USR-101': { activo: true },
+  'USR-102': { activo: true },
 };
 
 function generateCode() {

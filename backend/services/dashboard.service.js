@@ -23,6 +23,7 @@ const ACCION_LABELS = {
   DESCARGAR: 'Descarga PDF',
   IMPRIMIR: 'Impresión',
   REIMPRIMIR: 'Reimpresión',
+  EXPORTAR_REPORTE: 'Exportación de reporte',
 };
 
 function resolveVisibility(actor) {
@@ -71,17 +72,15 @@ function buildQuickActions(actor) {
     actions.push({ id: 'validar-qr', label: 'Validar QR', icon: 'qr-code-scan', href: '/validar.html', color: 'info' });
   }
   if (can(PERMISOS.REPORTES_VER) || actor?.tipoUsuario === ROLES.ADMINISTRADOR || actor?.tipoUsuario === ROLES.COORDINADOR) {
-    actions.push({ id: 'reportes', label: 'Reportes', icon: 'bar-chart', href: '#seccionGraficas', color: 'warning' });
+    actions.push({ id: 'reportes', label: 'Reportes', icon: 'bar-chart', href: '/reportes.html', color: 'warning' });
   }
   if (can(PERMISOS.AUDITORIA_VER)) {
-    actions.push({ id: 'auditoria', label: 'Auditoría', icon: 'journal-text', href: '#seccionActividad', color: 'dark' });
+    actions.push({ id: 'auditoria', label: 'Auditoría', icon: 'journal-text', href: '/auditoria.html', color: 'dark' });
   }
   if (
-    can(PERMISOS.REGIONALES_GESTIONAR) ||
-    can(PERMISOS.ROLES_GESTIONAR) ||
     can(PERMISOS.CONFIG_GESTIONAR)
   ) {
-    actions.push({ id: 'config', label: 'Configuración', icon: 'gear', href: '/organizacion.html', color: 'secondary' });
+    actions.push({ id: 'config', label: 'Sistema', icon: 'gear', href: '/sistema.html', color: 'secondary' });
   }
 
   return actions;

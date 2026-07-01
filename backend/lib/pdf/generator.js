@@ -21,13 +21,26 @@ async function htmlToPdf(html, pageConfig = {}) {
   const page = await browser.newPage();
 
   try {
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });
-
-    const pdfBuffer = await page.pdf({
-      printBackground: true,
-      preferCSSPageSize: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+    await page.setContent(html, {
+      waitUntil: pageConfig.waitUntil || 'domcontentloaded',
+      timeout: pageConfig.timeout || 30000,
     });
+
+    const pdfOptions = {
+      printBackground: true,
+      margin: pageConfig.margin || { top: 0, right: 0, bottom: 0, left: 0 },
+    };
+
+    if (pageConfig.widthMm && pageConfig.heightMm) {
+      pdfOptions.width = `${pageConfig.widthMm}mm`;
+      pdfOptions.height = `${pageConfig.heightMm}mm`;
+      pdfOptions.preferCSSPageSize = true;
+    } else {
+      pdfOptions.format = pageConfig.format || 'A4';
+      pdfOptions.preferCSSPageSize = Boolean(pageConfig.preferCSSPageSize);
+    }
+
+    const pdfBuffer = await page.pdf(pdfOptions);
 
     return pdfBuffer;
   } finally {

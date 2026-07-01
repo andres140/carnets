@@ -5,7 +5,10 @@
 
 const express = require('express');
 const twoFactorAuthService = require('../services/twoFactorAuthService');
+const authService = require('../services/auth.service');
 const { requireAuth } = require('../middleware/auth');
+const { loginRateLimit } = require('../middleware/rateLimit');
+const { csrfProtection } = require('../middleware/csrf');
 const auditoriaService = require('../services/auditoria.service');
 const { getClientIp } = require('../utils/request');
 
@@ -15,7 +18,7 @@ const router = express.Router();
  * POST /api/auth/2fa/setup
  * Iniciar setup de 2FA
  */
-router.post('/setup', requireAuth, async (req, res, next) => {
+router.post('/setup', requireAuth, csrfProtection, async (req, res, next) => {
   try {
     const usuarioId = req.session.user.id;
     const ipAddress = getClientIp(req);
@@ -46,7 +49,7 @@ router.post('/setup', requireAuth, async (req, res, next) => {
  * POST /api/auth/2fa/verify
  * Verificar y completar setup de 2FA
  */
-router.post('/verify', requireAuth, async (req, res, next) => {
+router.post('/verify', requireAuth, csrfProtection, async (req, res, next) => {
   try {
     const { token } = req.body;
     const usuarioId = req.session.user.id;
@@ -86,7 +89,7 @@ router.post('/verify', requireAuth, async (req, res, next) => {
  * POST /api/auth/2fa/verify-login
  * Verificar token 2FA durante login
  */
-router.post('/verify-login', async (req, res, next) => {
+router.post('/verify-login', loginRateLimit, csrfProtection, async (req, res, next) => {
   try {
     const { usuarioId, token } = req.body;
 
@@ -104,13 +107,10 @@ router.post('/verify-login', async (req, res, next) => {
     }
 
     // Completar login
-    const users = await require('../config/database').query(
-      'SELECT * FROM usuarios WHERE id = ?',
-      [usuarioId]
-    );
+    const user = await authService.getById(usuarioId);
 
-    if (users.length > 0) {
-      req.session.user = users[0];
+    if (user) {
+      req.session.user = user;
 
       await auditoriaService.log({
         usuarioId,
@@ -124,7 +124,7 @@ router.post('/verify-login', async (req, res, next) => {
     return res.json({
       success: true,
       message: '2FA verificado, sesión iniciada',
-      user: users[0],
+      data: user,
     });
   } catch (err) {
     next(err);
@@ -135,7 +135,7 @@ router.post('/verify-login', async (req, res, next) => {
  * POST /api/auth/2fa/disable
  * Deshabilitar 2FA
  */
-router.post('/disable', requireAuth, async (req, res, next) => {
+router.post('/disable', requireAuth, csrfProtection, async (req, res, next) => {
   try {
     const usuarioId = req.session.user.id;
     const ipAddress = getClientIp(req);

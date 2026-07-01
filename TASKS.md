@@ -1,6 +1,6 @@
 # TASKS — SENA Carnés
 
-Checklist de tareas del proyecto. Actualizado tras auditoría del 2026-06-26.
+Checklist de tareas del proyecto. Actualizado tras Sprint 10 (v1.0.0 RC1) del 2026-07-01.
 
 **Leyenda:** `[x]` terminado · `[ ]` pendiente · `[~]` parcial
 
@@ -246,23 +246,74 @@ Checklist de tareas del proyecto. Actualizado tras auditoría del 2026-06-26.
 
 ---
 
-## Fase 6 — Dashboard y Reportes
+## Sprint 8 — Reportes institucionales ✅ (2026-07-01)
+
+- [x] Centro de reportes (`reportes.html`)
+- [x] API `/api/reportes` (usuarios, carnés, validaciones, estadísticas)
+- [x] Búsqueda avanzada con filtros combinables
+- [x] Exportación CSV, Excel (.xlsx), PDF
+- [x] Estadísticas y gráficas Chart.js
+- [x] Alcance por rol (coordinador regional)
+- [x] Auditoría de exportaciones
+- [x] `scripts/sprint8-verify-reportes.js`
+- [x] `SPRINT_8_REPORT.md`
+
+---
+
+## Sprint 9 — Auditoría, configuración y notificaciones ✅ (2026-07-01)
+
+- [x] Bitácora ampliada (rol, módulo, resultado, IP, user-agent)
+- [x] UI `/auditoria.html` + API `GET /api/auditoria`
+- [x] Configuración del sistema en BD (`configuracion_sistema`)
+- [x] UI `/sistema.html` (config, sesiones, monitoreo, notificaciones)
+- [x] Notificaciones internas + campana navbar
+- [x] Gestión de sesiones activas y revocación
+- [x] Monitoreo MySQL, almacenamiento, seguridad
+- [x] Migración `008_sprint9_sistema.sql` + setup script
+- [x] `scripts/sprint9-verify-sistema.js`
+- [x] `SPRINT_9_REPORT.md`
+
+---
+
+## Sprint 10 — Release Candidate 1 ✅ (2026-07-01)
+
+- [x] Auditoría integral del proyecto
+- [x] Script `setup-db.js` unificado
+- [x] Script `sprint10-verify-rc1.js` (9 suites)
+- [x] Correcciones seguridad (env prod, CSRF 2FA, XSS, SVG)
+- [x] Fix password recovery admin + tests unitarios
+- [x] Eliminación código muerto
+- [x] README reescrito (Express)
+- [x] `.env.example`
+- [x] INSTALL.md, API_DOCUMENTATION.md, DATABASE_DOCUMENTATION.md
+- [x] USER_MANUAL.md, DEPLOYMENT.md
+- [x] VERSION.md, RELEASE_NOTES.md, FINAL_PROJECT_REPORT.md
+- [x] `SPRINT_10_REPORT.md`
+
+**Estado final: v1.0.0 — LISTA PARA ENTREGA**
+
+---
+
+## Fase 6 — Dashboard y Reportes ✅
 
 - [x] UI dashboard ejecutivo completo
 - [x] API `/api/dashboard` con estadísticas reales
 - [x] Contadores completos y gráficas
 - [x] Validaciones recientes y alertas
-- [ ] Página de reportes dedicada (Sprint 8)
-- [ ] Exportación CSV
-- [ ] Filtros por fechas avanzados
+- [x] Página de reportes dedicada (`reportes.html`)
+- [x] Exportación CSV, XLSX, PDF
+- [x] Filtros avanzados combinables
+- [ ] Exportación programada por correo (Sprint 10+)
 
 ---
 
 ## Fase 7 — Auditoría y Roles
 
-- [x] Servicio `auditoriaService.js` (logging)
-- [ ] UI listado de auditoría (`/auditoria.html`)
-- [ ] GET `/api/auditoria` con paginación y filtros
+- [x] Servicio `auditoriaService.js` (logging ampliado)
+- [x] UI listado de auditoría (`/auditoria.html`)
+- [x] GET `/api/auditoria` con paginación y filtros
+- [x] UI configuración del sistema (`/sistema.html`)
+- [x] GET/PUT `/api/configuracion/sistema`
 - [ ] UI gestión de roles y permisos
 - [ ] PUT `/api/roles/:id/permisos`
 - [ ] UI configuración regionales (CRUD)
@@ -309,11 +360,26 @@ Checklist de tareas del proyecto. Actualizado tras auditoría del 2026-06-26.
 
 ---
 
+## Quality Gate pre-Sprint 8 ✅ (2026-07-01)
+
+- [x] Auditoría técnica completa (`QUALITY_GATE_REPORT.md`)
+- [x] Verificar configuración DB desde `.env` (única fuente en stack activo)
+- [x] Verificar `schema.sql` + `seed.sql` (coordinador OK)
+- [x] Scripts verificación Sprint 0–7 ejecutados
+- [x] Fix rate limit compartido entre middlewares
+- [x] Fix `securityAuditService` async + UUID
+- [x] Fix exposición `password_hash` en 2FA verify-login
+- [ ] Integrar migraciones 002/003 en schema principal
+- [ ] Reemplazar `npm test` (mock legacy) por tests Express
+
+---
+
 ## Bloqueadores actuales (prioridad inmediata)
 
 - [x] Corregir CSRF: frontend envía `X-CSRF-Token`
 - [x] Completar `package.json` con dependencias runtime
 - [x] Corregir `seed.sql` usuario coordinador
 - [x] Verificar MySQL + servidor arrancan correctamente
+- [x] Fix rate limit que bloqueaba 2.º login y scripts de verificación
 - [ ] Actualizar README.md al stack Express
 - [ ] Integrar migraciones 002/003 o documentar aplicación obligatoria

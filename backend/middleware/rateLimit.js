@@ -10,12 +10,13 @@ const rateLimitStore = {};
  * @param {number} maxRequests - Número máximo de solicitudes
  * @param {number} windowSeconds - Ventana de tiempo en segundos
  */
-function createRateLimiter(maxRequests = 10, windowSeconds = 60) {
+function createRateLimiter(maxRequests = 10, windowSeconds = 60, namespace = 'default') {
   return (req, res, next) => {
-    const identifier =
+    const clientIp =
       req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
       req.socket.remoteAddress ||
       'unknown';
+    const identifier = `${namespace}:${clientIp}`;
     const now = Date.now();
 
     // Inicializar o recuperar registro
@@ -51,19 +52,21 @@ function createRateLimiter(maxRequests = 10, windowSeconds = 60) {
 }
 
 /**
- * Middleware para login: máximo 5 intentos en 15 minutos
+ * Límites más altos en desarrollo para suites de verificación RC1.
  */
-const loginRateLimit = createRateLimiter(5, 900);
+const isProd = process.env.NODE_ENV === 'production';
+const loginMax = isProd ? 5 : 100;
+const loginRateLimit = createRateLimiter(loginMax, 900, 'login');
 
 /**
  * Middleware para validación QR: máximo 100 en 1 hora
  */
-const qrValidationRateLimit = createRateLimiter(100, 3600);
+const qrValidationRateLimit = createRateLimiter(100, 3600, 'qr');
 
 /**
  * Middleware para API general: máximo 1000 en 1 minuto
  */
-const apiRateLimit = createRateLimiter(1000, 60);
+const apiRateLimit = createRateLimiter(1000, 60, 'api');
 
 module.exports = {
   createRateLimiter,

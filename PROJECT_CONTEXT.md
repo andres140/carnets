@@ -2,10 +2,11 @@
 
 > Contexto completo para que cualquier desarrollador o IA pueda continuar el proyecto sin perder información.
 
-**Última actualización:** 2026-06-26 (Sprint 7)  
+**Última actualización:** 2026-07-01 (Sprint 10 — v1.0.0 RC1)  
 **Stack activo:** Express + MySQL + HTML/Bootstrap (`backend/` + `public/`)  
 **Stack legacy (no modificar):** Next.js + Prisma (`src/`)  
-**Avance estimado:** ~92%
+**Avance estimado:** 97% — **LISTO PARA ENTREGA**  
+**Informe final:** [FINAL_PROJECT_REPORT.md](./FINAL_PROJECT_REPORT.md)
 
 ---
 
@@ -32,11 +33,11 @@ Sistema web para el **Servicio Nacional de Aprendizaje (SENA)** que permite:
 docker compose up -d
 
 # 2. Esquema y datos
-mysql -u root -p < database/schema.sql
-mysql -u root -p < database/seed.sql
-# Opcional (seguridad avanzada):
-mysql -u root -p sena_carnets < migrations/002_security_audit.sql
-mysql -u root -p sena_carnets < migrations/003_password_recovery_2fa.sql
+npm run setup:db
+# Equivalente manual:
+# mysql -u root -p < database/schema.sql
+# mysql -u root -p < database/seed.sql
+# node scripts/setup-db.js
 
 # 3. Variables de entorno
 cp .env.example .env
@@ -92,6 +93,31 @@ npm run dev
 node scripts/sprint7-verify-dashboard.js
 ```
 
+### Verificación Sprint 8 — Reportes
+
+```bash
+npm run dev
+node scripts/sprint8-verify-reportes.js
+```
+
+### Quality Gate pre-Sprint 8 (2026-07-01)
+
+```bash
+node scripts/sprint0-verify-db.js
+npm run dev
+node scripts/sprint0-verify-auth.js
+node scripts/sprint2-verify-usuarios.js
+node scripts/sprint3-verify-organizacion.js
+node scripts/sprint4-verify-carnets.js
+node scripts/sprint5-verify-pdf.js
+node scripts/sprint6-verify-qr.js
+node scripts/sprint7-verify-dashboard.js
+```
+
+> Si se encadenan todos los scripts sin reiniciar el servidor, el rate limit de login (5/15 min) puede bloquear logins adicionales. Reiniciar `npm run dev` entre lotes o ejecutar por sprint.
+
+**Migraciones opcionales (seguridad avanzada):** aplicar `migrations/002_security_audit.sql` y `migrations/003_password_recovery_2fa.sql` si se usan recuperación de contraseña, 2FA o auditoría de seguridad en login.
+
 ### Verificación Sprint 6 — Validación QR
 
 ```bash
@@ -137,7 +163,7 @@ Browser (public/js/*.js)
 | admin@sena.edu.co | Admin123! | ADMINISTRADOR |
 | coord@sena.edu.co | Coord123! | COORDINADOR |
 
-> ⚠️ El usuario coordinador en `seed.sql` tiene un bug conocido en el INSERT (ver AUDITORIA_PROYECTO.md).
+> El usuario coordinador en `seed.sql` está corregido (`rol_id='rol-coord'`, contraseña `Coord123!`).
 
 ---
 
@@ -198,9 +224,13 @@ app_carnets/
 | PDF / Impresión | **Completo** | Sprint 5 |
 | QR / Validación | **Completo** | Sprint 6 |
 | Dashboard | **Completo (ejecutivo)** | Sprint 7 — Chart.js, `/api/dashboard` |
-| Reportes | Parcial (gráficas en dashboard) | Sprint 8 |
-| Auditoría | Logging only | `auditoriaService.js` |
-| Config | Catálogos GET | `catalog.service.js` |
+| Reportes | **Completo** | Sprint 8 — `/api/reportes`, `reportes.html` |
+| Auditoría | **Completo** | Sprint 9 — `/api/auditoria`, `auditoria.html` |
+| Configuración | **Completo** | Sprint 9 — `/api/configuracion/sistema`, `sistema.html` |
+| Notificaciones | **Completo** | Sprint 9 — `/api/notificaciones`, campana navbar |
+| Sesiones | **Completo** | Sprint 9 — `/api/sesiones`, `sessionGuard.js` |
+| Monitoreo | **Completo** | Sprint 9 — `/api/monitoreo/*` |
+| Config catálogos | Catálogos GET | `catalog.service.js` |
 
 ---
 
@@ -218,7 +248,11 @@ app_carnets/
 - `historial_carnets` — cambios de estado
 - `carnet_documentos_historial` — generación, descarga, impresión, reimpresión (Sprint 5)
 - `validaciones_qr` — log de escaneos
-- `auditoria` — acciones del sistema (JSON en `detalle_json`)
+- `auditoria` — acciones del sistema (JSON en `detalle_json`; Sprint 9: `modulo`, `resultado`, `user_agent`)
+- `auditoria_seguridad` — eventos de seguridad (login fallido, rate limit, etc.)
+- `configuracion_sistema` — parámetros clave-valor del sistema (Sprint 9)
+- `notificaciones` — alertas internas por usuario o globales (Sprint 9)
+- `sesiones_usuario` — registro de sesiones activas (Sprint 9)
 - `roles` / `permisos` / `rol_permisos` — RBAC
 
 ### Código único de carné (diseño)

@@ -1,16 +1,20 @@
 const auditoriaService = require('../services/auditoria.service');
-const { getClientIp } = require('./request');
+const { getClientIp, getUserAgent } = require('./request');
 
-async function logAudit(req, { accion, entidad, entidadId, detalle = null }) {
-  if (!req.session?.user?.id) return;
+async function logAudit(req, { accion, entidad, entidadId, detalle = null, modulo = null, resultado = 'EXITO' }) {
+  const user = req.session?.user;
 
   await auditoriaService.log({
-    usuarioId: req.session.user.id,
+    usuarioId: user?.id || null,
+    rolNombre: user?.rolNombre || null,
     accion,
     entidad,
     entidadId,
     detalle,
+    modulo,
+    resultado,
     ip: getClientIp(req),
+    userAgent: getUserAgent(req),
   });
 }
 

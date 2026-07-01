@@ -1,7 +1,7 @@
 # Arquitectura — SENA Carnés
 
 **Stack activo:** Express + MySQL + HTML/Bootstrap  
-**Última actualización:** 2026-06-26 (Sprint 7)
+**Última actualización:** 2026-07-01 (Sprint 8)
 
 ---
 
@@ -41,13 +41,14 @@ Sistema monolito **Node.js/Express** que sirve API REST y archivos estáticos de
 │  auth.controller.js · users.controller.js · catalog.controller.js │
 │  organizacion.controller.js · roles.controller.js · carnets.controller.js │
 │  carnetDocumento.controller.js · validacion.controller.js · dashboard.controller.js │
+│  reportes.controller.js │
 └───────────────────────────┬────────────────────────────────────┘
                             │
 ┌───────────────────────────▼────────────────────────────────────┐
 │                       Services                                  │
 │  Lógica de negocio · Permisos de alcance · Validaciones        │
 │  auth.service · users.service · catalog.service · qr · validacion           │
-│  carnetPdf · dashboard · auditoria                                          │
+│  carnetPdf · dashboard · auditoria · reportes                                          │
 └───────────────────────────┬────────────────────────────────────┘
                             │
 ┌───────────────────────────▼────────────────────────────────────┐
@@ -56,6 +57,7 @@ Sistema monolito **Node.js/Express** que sirve API REST y archivos estáticos de
 │  users.repository.js · regionales.repository.js · centros.repository.js │
 │  dependencias.repository.js · roles.repository.js · permisos.repository.js │
 │  carnets.repository.js · carnetDocumentos.repository.js · dashboard.repository.js │
+│  reportes.repository.js │
 └───────────────────────────┬────────────────────────────────────┘
                             │
 ┌───────────────────────────▼────────────────────────────────────┐
@@ -170,7 +172,7 @@ POST /api/auth/login
 
 - **Páginas HTML:** `requireAuth` redirige a `/login.html`
 - **API usuarios:** `requireRole('ADMINISTRADOR', 'COORDINADOR')`
-- **Permisos granulares:** `requirePermission()` implementado pero **no usado** en rutas actuales
+- **Permisos granulares:** `requirePermission()` en usuarios, carnés, organización y roles
 
 ### RBAC diseñado
 
@@ -192,11 +194,14 @@ Permisos: `usuarios.crear`, `carnets.generar`, `validar.qr`, `reportes.ver`, etc
 | SQL parametrizado | ✅ | Todos los services |
 | CORS restringido | ✅ | app.js |
 | Security headers | ✅ | securityHeaders.js |
-| Rate limiting | ✅ | rateLimit.js |
+| Rate limiting | ✅ | rateLimit.js (contadores por namespace: api/login/qr) |
 | CSRF | ✅ Backend + frontend (Sprint 0) | csrf.js, api.js, GET /api/auth/csrf-token |
-| Auditoría acciones | ✅ Parcial | auditoriaService.js |
-| Auditoría seguridad | 🟡 Requiere migración | securityAuditService.js |
-| Filtro regional coordinadores | ❌ Pendiente | users.service.js |
+| Auditoría acciones | ✅ | auditoria.service.js, auditHelper.js |
+| Auditoría seguridad | ✅ | securityAuditService.js + tabla auditoria_seguridad |
+| Configuración sistema | ✅ | configuracion.service.js |
+| Notificaciones internas | ✅ | notificaciones.service.js |
+| Gestión sesiones | ✅ | sesiones.service.js, sessionGuard.js |
+| Filtro regional coordinadores | ✅ | users.service.js, dashboard.repository.js |
 | QR HMAC signing | ✅ | qr.service.js, env.qr.signingKey |
 
 ---
@@ -245,8 +250,14 @@ flowchart TD
   Carnets --> Dashboard[Dashboard]
   Carnets --> Reportes[Reportes]
   Auth --> Auditoria[Auditoría]
+  Auth --> Config[Configuración]
+  Auth --> Notif[Notificaciones]
+  Auth --> Sesiones[Sesiones]
   Users --> Auditoria
   Carnets --> Auditoria
+  Reportes --> Auditoria
+  Config --> Auditoria
+  Config --> Notif
   Catalog[Catálogos] --> Users
   Catalog --> Carnets
   Roles[Roles/Permisos] --> Auth

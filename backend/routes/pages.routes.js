@@ -51,4 +51,31 @@ router.get(
   }
 );
 
+router.get(
+  '/reportes.html',
+  requireAuth,
+  requirePermission(PERMISOS.REPORTES_VER),
+  (_req, res) => {
+    res.sendFile(path.join(pagesDir, 'reportes.html'));
+  }
+);
+
+router.get(
+  '/auditoria.html',
+  requireAuth,
+  requirePermission(PERMISOS.AUDITORIA_VER),
+  (_req, res) => {
+    res.sendFile(path.join(pagesDir, 'auditoria.html'));
+  }
+);
+
+router.get(
+  '/sistema.html',
+  requireAuth,
+  requirePermission(PERMISOS.CONFIG_GESTIONAR),
+  (_req, res) => {
+    res.sendFile(path.join(pagesDir, 'sistema.html'));
+  }
+);
+
 module.exports = router;

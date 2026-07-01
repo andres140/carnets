@@ -2,6 +2,89 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.0] — Sprint 10 RC1 (2026-07-01)
+
+### Entrega final — Release Candidate
+
+- Script unificado `npm run setup:db`
+- Verificación integral `npm run verify:rc1`
+- Documentación completa (INSTALL, API, DATABASE, USER, DEPLOY, VERSION, RELEASE_NOTES, FINAL_PROJECT_REPORT)
+- README reescrito para stack Express
+- `.env.example` creado
+- Fix seguridad: secretos prod, CSRF 2FA, XSS escapeHtml, bloqueo SVG
+- Fix password recovery admin check
+- Eliminado `notificationService.js` (código muerto)
+- Tests unitarios corregidos
+
+**Estado: v1.0.0 — LISTA PARA ENTREGA Y DESPLIEGUE**
+
+---
+
+## [Unreleased] — Sprint 9 (2026-07-01)
+
+### Añadido — Auditoría, configuración, notificaciones y sesiones
+
+**Backend:**
+- Bitácora ampliada (`rol_nombre`, `modulo`, `resultado`, `user_agent`)
+- Tablas: `configuracion_sistema`, `notificaciones`, `sesiones_usuario`
+- API `/api/auditoria`, `/api/configuracion/sistema`, `/api/notificaciones`, `/api/sesiones`, `/api/monitoreo`
+- Middleware `sessionGuard` — revocación de sesiones administrativa
+- Notificaciones automáticas: carnés por vencer, sin foto, accesos sospechosos, exportaciones, config
+
+**Frontend:**
+- `/auditoria.html` — consulta de bitácora con filtros y paginación
+- `/sistema.html` — configuración, sesiones, monitoreo, notificaciones
+- Campana de notificaciones en navbar (`notificaciones-ui.js`)
+
+**Migración:** `database/migrations/008_sprint9_sistema.sql` + `scripts/sprint9-setup-db.js`
+
+**Verificación:** `sprint9-verify-sistema.js`
+
+**Documentación:** `SPRINT_9_REPORT.md`
+
+---
+
+## [Unreleased] — Sprint 8 (2026-07-01)
+
+### Añadido — Centro de reportes institucionales
+
+**Backend:**
+- `reportes.repository.js`, `reportes.service.js`, `reportes.controller.js`, `reportes.routes.js`
+- `reportExport.js` — exportación CSV, Excel (xlsx), PDF
+- `GET /api/reportes/*` — estadísticas, usuarios, carnés, validaciones, búsqueda avanzada
+- Alcance por rol (admin/coordinador/instructor)
+- Auditoría `EXPORTAR_REPORTE` en cada exportación
+
+**Frontend:**
+- `public/pages/reportes.html` — centro de reportes con 5 pestañas
+- Gráficas Chart.js, filtros combinables, paginación, exportación
+- Integración navbar dashboard y accesos rápidos
+
+**Dependencia:** `xlsx`
+
+**Verificación:** `sprint8-verify-reportes.js`
+
+**Documentación:** `SPRINT_8_REPORT.md`
+
+---
+
+## [Unreleased] — Quality Gate pre-Sprint 8 (2026-07-01)
+
+### Corregido — Estabilidad y seguridad
+
+- **Rate limiting:** contadores separados por namespace (`api`, `login`, `qr`) — el 2.º login ya no falla tras flujo CSRF + `/me`
+- **`securityAuditService`:** uso async de `db.query` + `id` UUID en INSERT a `auditoria_seguridad`
+- **2FA verify-login:** sesión y respuesta sin `password_hash` (usa `authService.getById` / `pickUserSession`)
+
+### Documentación
+
+- `QUALITY_GATE_REPORT.md` — auditoría técnica completa Sprints 0–7
+- Actualizados `PROJECT_CONTEXT.md`, `TASKS.md`, `ARCHITECTURE.md`
+
+**Verificación:** scripts Sprint 0–7 OK tras correcciones (ver `QUALITY_GATE_REPORT.md`)
+
+---
+
 ## [Unreleased] — Sprint 7 (2026-06-26)
 
 ### Añadido — Dashboard ejecutivo

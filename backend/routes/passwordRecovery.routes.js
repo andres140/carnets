@@ -165,7 +165,10 @@ router.get('/status', async (req, res, next) => {
     }
 
     // Solo administradores
-    if (req.session.user.rol !== 'ADMINISTRADOR') {
+    const isAdmin =
+      req.session.user.tipoUsuario === 'ADMINISTRADOR' ||
+      req.session.user.permisos?.includes('config.gestionar');
+    if (!isAdmin) {
       return res.status(403).json({
         success: false,
         error: 'Acceso denegado',

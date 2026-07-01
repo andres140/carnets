@@ -1,0 +1,26 @@
+/* Auditoría institucional */
+.audit-hero {
+  background: linear-gradient(135deg, rgba(33, 37, 41, 0.06), rgba(0, 102, 204, 0.08));
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.audit-table th {
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.audit-table td {
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+.badge-exito { background: #d1e7dd; color: #0f5132; }
+.badge-error { background: #f8d7da; color: #842029; }
+
+.audit-detail {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

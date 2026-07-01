@@ -108,7 +108,7 @@
       renderTabla(res.data.items);
       renderPaginacion(res.data.pagination);
     } catch (err) {
-      els.tabla.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">${err.message}</td></tr>`;
+      els.tabla.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">${escapeHtml(err.message)}</td></tr>`;
       showToast(err.message, 'error');
     }
   }
